@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../utils/api";
 
 function ActivityPage({
   loadingStocks,
@@ -54,7 +55,7 @@ function ActivityPage({
       setSavingEdit(true);
       setEditError("");
 
-      const response = await fetch("http://localhost/smplDB/update_stock.php", {
+      const response = await apiFetch("update_stock.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

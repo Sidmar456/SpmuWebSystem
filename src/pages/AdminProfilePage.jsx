@@ -11,6 +11,7 @@ import {
   FiX,
   FiKey,
 } from "react-icons/fi";
+import { apiFetch } from "../utils/api";
 
 function AdminProfilePage({ page, user, onUpdateUser }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -80,7 +81,7 @@ function AdminProfilePage({ page, user, onUpdateUser }) {
     setUpdating(true);
 
     try {
-      const response = await fetch("http://localhost/smplDB/update_profile.php", {
+      const response = await apiFetch("update_profile.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

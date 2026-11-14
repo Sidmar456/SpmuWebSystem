@@ -16,6 +16,7 @@ import newProductIcon from "./icon/new-product.png";
 import outOfStockIcon from "./icon/out-of-stock.png";
 import statsIcon from "./icon/stats.png";
 import { groupRequests } from "./utils/requestGroups";
+import { apiFetch } from "./utils/api";
 
 const navigation = [
   {
@@ -237,7 +238,7 @@ function App() {
 
   const fetchAdminNotifications = useCallback(async () => {
     try {
-      const res = await fetch("http://localhost/smplDB/get_notifications.php", {
+      const res = await apiFetch("get_notifications.php", {
         credentials: "include",
       });
       const data = await res.json();
@@ -266,7 +267,7 @@ function App() {
 
   const markAdminNotifsRead = async () => {
     try {
-      await fetch("http://localhost/smplDB/mark_notifications_read.php", {
+      await apiFetch("mark_notifications_read.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -306,8 +307,8 @@ function App() {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost/smplDB/confirm_claim.php",
+      const response = await apiFetch(
+        "confirm_claim.php",
         {
           method: "POST",
           body: formData,
@@ -368,7 +369,7 @@ function App() {
     setClaimResult(null);
 
     try {
-      const response = await fetch("http://localhost/smplDB/claim_item.php", {
+      const response = await apiFetch("claim_item.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -397,8 +398,8 @@ function App() {
     try {
       setTransactionLoading(true);
 
-      const response = await fetch(
-        "http://localhost/smplDB/get_transactions.php",
+      const response = await apiFetch(
+        "get_transactions.php",
         {
           credentials: "include",
         },
@@ -435,8 +436,8 @@ function App() {
     setUpdatingRequest(true);
 
     try {
-      const response = await fetch(
-        "http://localhost/smplDB/update_request_status.php",
+      const response = await apiFetch(
+        "update_request_status.php",
         {
           method: "POST",
           headers: {
@@ -660,7 +661,7 @@ function App() {
       await Promise.all([
         fetchPendingRequests(),
         fetchAccountRequests(),
-        fetch("http://localhost/smplDB/inventory_stats.php")
+        apiFetch("inventory_stats.php")
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
@@ -674,7 +675,7 @@ function App() {
           .catch((error) => {
             console.error("Error fetching inventory stats:", error);
           }),
-        fetch("http://localhost/smplDB/get_stocks.php")
+        apiFetch("get_stocks.php")
           .then((response) => {
             if (!response.ok) {
               throw new Error("Failed to fetch stocks");
@@ -691,7 +692,7 @@ function App() {
           .finally(() => {
             setLoadingStocks(false);
           }),
-        fetch("http://localhost/smplDB/get_stocks_summary.php")
+        apiFetch("get_stocks_summary.php")
           .then((response) => {
             if (!response.ok) {
               throw new Error("Failed to fetch stock summary");
@@ -715,7 +716,7 @@ function App() {
     try {
       setLoadingRequests(true);
 
-      const response = await fetch("http://localhost/smplDB/get_requests.php", {
+      const response = await apiFetch("get_requests.php", {
         method: "GET",
         credentials: "include",
       });
@@ -748,8 +749,8 @@ function App() {
     try {
       setLoadingAccountRequests(true);
 
-      const response = await fetch(
-        "http://localhost/smplDB/get_account_requests.php",
+      const response = await apiFetch(
+        "get_account_requests.php",
         {
           method: "GET",
           credentials: "include",
@@ -779,8 +780,8 @@ function App() {
   };
   const approveAccount = async (id) => {
     try {
-      const response = await fetch(
-        "http://localhost/smplDB/approve_account.php",
+      const response = await apiFetch(
+        "approve_account.php",
         {
           method: "POST",
           credentials: "include",
@@ -823,8 +824,8 @@ function App() {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost/smplDB/reject_account.php",
+      const response = await apiFetch(
+        "reject_account.php",
         {
           method: "POST",
           credentials: "include",
@@ -875,7 +876,7 @@ function App() {
 
     const timer = setTimeout(() => controller.abort(), 10000);
 
-    fetch("http://localhost/smplDB/check_session.php", {
+    apiFetch("check_session.php", {
       method: "GET",
       credentials: "include",
       signal: controller.signal,
@@ -941,7 +942,7 @@ function App() {
         formData.append("image", itemImage);
       }
 
-      const response = await fetch("http://localhost/smplDB/add_stock.php", {
+      const response = await apiFetch("add_stock.php", {
         method: "POST",
         body: formData,
       });
@@ -977,7 +978,7 @@ function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost/smplDB/logout.php", {
+      await apiFetch("logout.php", {
         method: "POST",
         credentials: "include",
       });

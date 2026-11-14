@@ -1,3 +1,5 @@
+import { apiUrl } from "../utils/api";
+
 function InventoryPage({
   activeManagementTab,
   addStock,
@@ -91,7 +93,7 @@ function InventoryPage({
                             <div className="stock-image">
                               {stock.image ? (
                                 <img
-                                  src={`http://localhost/smplDB/uploads/stocks/${stock.image}`}
+                                  src={apiUrl(`uploads/stocks/${stock.image}`)}
                                   alt={stock.item_name}
                                 />
                               ) : (

@@ -21,8 +21,7 @@ import {
 } from "react-icons/fi";
 import "../App.css";
 import { groupRequests } from "../utils/requestGroups";
-
-const API = "http://localhost/smplDB";
+import { apiFetch, apiUrl } from "../utils/api";
 
 function UserPage({ user, onLogin, onLogout }) {
   // Navigation
@@ -140,7 +139,7 @@ function UserPage({ user, onLogin, onLogout }) {
   // Fetch requests belonging to the logged-in user
   const fetchMyRequests = useCallback(async () => {
     try {
-      const response = await fetch(`${API}/get_my_requests.php`, {
+      const response = await apiFetch("get_my_requests.php", {
         credentials: "include",
       });
 
@@ -221,7 +220,7 @@ function UserPage({ user, onLogin, onLogout }) {
   // Fetch DB notifications (approved/cancelled by admin)
   const fetchDbNotifications = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/get_notifications.php`, {
+      const res = await apiFetch("get_notifications.php", {
         credentials: "include",
       });
       const data = await res.json();
@@ -250,7 +249,7 @@ function UserPage({ user, onLogin, onLogout }) {
 
   const markDbNotifsRead = async () => {
     try {
-      await fetch(`${API}/mark_notifications_read.php`, {
+      await apiFetch("mark_notifications_read.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -271,9 +270,7 @@ function UserPage({ user, onLogin, onLogout }) {
 
     try {
       const fetchStocks = async () => {
-        const response = await fetch(
-          `${API}/get_available_stocks.php`
-        );
+        const response = await apiFetch("get_available_stocks.php");
 
         if (!response.ok) {
           throw new Error("Failed to fetch inventory.");
@@ -461,7 +458,7 @@ function UserPage({ user, onLogin, onLogout }) {
     setBulkRequesting(true);
 
     try {
-      const response = await fetch(`${API}/request_stock.php`, {
+      const response = await apiFetch("request_stock.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -520,7 +517,7 @@ function UserPage({ user, onLogin, onLogout }) {
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API}/logout.php`, {
+      await apiFetch("logout.php", {
         method: "POST",
         credentials: "include",
       });
@@ -570,8 +567,8 @@ function UserPage({ user, onLogin, onLogout }) {
     setProfileUpdating(true);
 
     try {
-      const response = await fetch(
-        `${API}/update_profile.php`,
+      const response = await apiFetch(
+        "update_profile.php",
         {
           method: "POST",
           headers: {
@@ -726,8 +723,7 @@ function UserPage({ user, onLogin, onLogout }) {
     .charAt(0)
     .toUpperCase();
 
-  const stockImageUrl = (image) =>
-    `${API}/uploads/stocks/${image}`;
+  const stockImageUrl = (image) => apiUrl(`uploads/stocks/${image}`);
 
   // =========================================================
   // USER INTERFACE

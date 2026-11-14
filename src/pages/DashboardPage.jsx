@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { groupRequests } from "../utils/requestGroups";
+import { apiFetch } from "../utils/api";
 
 function DashboardPage({
   UPDATES_PER_PAGE,
@@ -33,7 +34,7 @@ function DashboardPage({
   const fetchAnalytics = async () => {
     try {
       setLoadingAnalytics(true);
-      const res = await fetch("http://localhost/smplDB/get_chart_analytics.php");
+      const res = await apiFetch("get_chart_analytics.php");
       const data = await res.json();
       if (data.success) {
         setAnalyticsData(data);

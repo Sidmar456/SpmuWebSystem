@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch } from "../utils/api";
 
 function Login({ onLogin }) {
   // Login
@@ -31,7 +32,7 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost/smplDB/login.php", {
+      const response = await apiFetch("login.php", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -86,7 +87,7 @@ function Login({ onLogin }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost/smplDB/signup.php", {
+      const response = await apiFetch("signup.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

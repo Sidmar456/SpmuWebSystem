@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { apiFetch, apiUrl } from "../utils/api";
 
 function UserOverviewPage({ page }) {
   const [users, setUsers] = useState([]);
@@ -20,8 +21,8 @@ function UserOverviewPage({ page }) {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        "http://localhost/smplDB/get_all_users_overview.php",
+      const response = await apiFetch(
+        "get_all_users_overview.php",
         {
           method: "GET",
           credentials: "include",
@@ -350,7 +351,7 @@ function UserOverviewPage({ page }) {
                             </p>
                           </div>
                           <a
-                            href={`http://localhost/smplDB/uploads/claims/${viewReceiptModal.claim_document}`}
+                            href={apiUrl(`uploads/claims/${viewReceiptModal.claim_document}`)}
                             target="_blank"
                             rel="noreferrer"
                             className="formal-doc-link-btn no-print"
@@ -361,7 +362,7 @@ function UserOverviewPage({ page }) {
                       ) : (
                         <div className="formal-img-preview-box">
                           <img
-                            src={`http://localhost/smplDB/uploads/claims/${viewReceiptModal.claim_document}`}
+                            src={apiUrl(`uploads/claims/${viewReceiptModal.claim_document}`)}
                             alt="Claim Document Proof"
                             className="formal-claim-doc-img"
                           />

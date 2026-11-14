@@ -1,4 +1,5 @@
 import { groupRequests } from "../utils/requestGroups";
+import { apiUrl } from "../utils/api";
 
 function ReportsPage({
   activeReportTab,
@@ -272,7 +273,7 @@ function ReportsPage({
                           <div className="report-detail-item-image">
                             {item.image ? (
                               <img
-                                src={`http://localhost/smplDB/uploads/stocks/${item.image}`}
+                                src={apiUrl(`uploads/stocks/${item.image}`)}
                                 alt={item.item_name}
                               />
                             ) : (

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { apiFetch, apiUrl } from "../utils/api";
 
 function EquipmentBorrowingPage({ page }) {
   const [borrowings, setBorrowings] = useState([]);
@@ -34,8 +35,8 @@ function EquipmentBorrowingPage({ page }) {
       if (filter !== "all") params.append("status", filter);
       if (search.trim()) params.append("search", search.trim());
 
-      const res = await fetch(
-        `http://localhost/smplDB/get_equipment_borrowings.php?${params.toString()}`,
+      const res = await apiFetch(
+        `get_equipment_borrowings.php?${params.toString()}`,
         { credentials: "include" }
       );
       const data = await res.json();
@@ -83,7 +84,7 @@ function EquipmentBorrowingPage({ page }) {
       setSubmittingReturn(true);
       setReturnError("");
 
-      const res = await fetch("http://localhost/smplDB/record_equipment_return.php", {
+      const res = await apiFetch("record_equipment_return.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -419,7 +420,7 @@ function EquipmentBorrowingPage({ page }) {
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         {b.item_image ? (
                           <img
-                            src={`http://localhost/smplDB/uploads/stocks/${b.item_image}`}
+                            src={apiUrl(`uploads/stocks/${b.item_image}`)}
                             alt=""
                             style={{ width: "36px", height: "36px", borderRadius: "6px", objectFit: "cover" }}
                           />

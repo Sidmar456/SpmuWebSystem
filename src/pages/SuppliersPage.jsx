@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "../utils/api";
 
 function SuppliersPage({ page }) {
   const [suppliers, setSuppliers] = useState([]);
@@ -35,8 +36,8 @@ function SuppliersPage({ page }) {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        "http://localhost/smplDB/get_suppliers.php",
+      const response = await apiFetch(
+        "get_suppliers.php",
         {
           method: "GET",
           credentials: "include",
@@ -124,7 +125,7 @@ function SuppliersPage({ page }) {
     setAddingSupplier(true);
 
     try {
-      const response = await fetch("http://localhost/smplDB/add_supplier.php", {
+      const response = await apiFetch("add_supplier.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -225,8 +226,8 @@ function SuppliersPage({ page }) {
     setSendingRequest(true);
 
     try {
-      const response = await fetch(
-        "http://localhost/smplDB/send_supplier_request.php",
+      const response = await apiFetch(
+        "send_supplier_request.php",
         {
           method: "POST",
           headers: {
@@ -282,8 +283,8 @@ function SuppliersPage({ page }) {
     }
 
     try {
-      const response = await fetch(
-        "http://localhost/smplDB/remove_supplier.php",
+      const response = await apiFetch(
+        "remove_supplier.php",
         {
           method: "POST",
           headers: {
