@@ -12,7 +12,8 @@ class ExampleTest extends TestCase
      */
     public function test_the_application_returns_a_successful_response(): void
     {
-        $response = $this->get('/');
+        // CI runs the tests before `npm run build`, so there is no Vite manifest yet.
+        $response = $this->withoutVite()->get('/');
 
         $response->assertStatus(200);
     }
