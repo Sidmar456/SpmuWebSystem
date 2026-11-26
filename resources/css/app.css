@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+
+@source '../**/*.blade.php';
+@source '../**/*.jsx';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+    /* Brand color. Change these two values to re-color the whole app. */
+    --color-brand: #2563eb;
+    --color-brand-dark: #1d4ed8;
+}
