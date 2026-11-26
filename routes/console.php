@@ -65,7 +65,7 @@ Artisan::command('spmu:waiting {--days=3}', function () {
     $counts = [
         'requests to review' => ItemRequest::where('status', RequestStatus::Pending)->where('created_at', '<', $before)->count(),
         'approved requests not yet issued' => ItemRequest::where('status', RequestStatus::Approved)->where('decided_at', '<', $before)->count(),
-        'turnovers to inspect' => Turnover::where('status', TurnoverStatus::Pending)->where('created_at', '<', $before)->count(),
+        'turnovers to receive' => Turnover::where('status', TurnoverStatus::Pending)->where('created_at', '<', $before)->count(),
     ];
     $waiting = array_filter($counts);
 
