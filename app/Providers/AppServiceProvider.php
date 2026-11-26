@@ -23,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Used as `can:admin` on routes and Gate::allows('admin') in controllers.
         Gate::define('admin', fn (User $user) => $user->isAdmin());
+        Gate::define('validator', fn (User $user) => $user->isValidator());
 
         // Per email and IP, so one office behind a shared IP does not lock everyone out.
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(5)

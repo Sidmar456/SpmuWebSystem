@@ -29,5 +29,5 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
     const auth = useContext(AuthContext);
-    return { ...auth, isAdmin: auth.user?.role === 'admin' };
+    return { ...auth, isAdmin: auth.user?.role === 'admin', isValidator: auth.user?.role === 'validator' };
 }

@@ -7,6 +7,7 @@ import { CONDITIONS, REASONS } from './labels';
 
 const LABELS = {
     item_request_line_id: 'Property item',
+    inspection_id: 'Pre-inspection report',
     quantity: 'Quantity',
     reason: 'Reason',
     condition: 'Condition',
@@ -17,7 +18,16 @@ export default function TurnoverForm() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const holdings = useApi('/turnovers/holdings');
-    const [form, setForm] = useState({ item_request_line_id: searchParams.get('line') ?? '', quantity: '1', reason: '', condition: 'serviceable', remarks: '' });
+    // Coming from a pre-inspection that found the item unserviceable: fill in what the report decided.
+    const inspectionId = searchParams.get('inspection');
+    const inspection = useApi(inspectionId ? `/inspections/${inspectionId}` : null);
+    const [form, setForm] = useState({
+        item_request_line_id: searchParams.get('line') ?? '',
+        quantity: '1',
+        reason: inspectionId ? 'unserviceable' : '',
+        condition: inspectionId ? 'unserviceable' : 'serviceable',
+        remarks: '',
+    });
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState('');
     const [busy, setBusy] = useState(false);
@@ -38,7 +48,7 @@ export default function TurnoverForm() {
         setErrors({});
         setMessage('');
         try {
-            const res = await api.post('/turnovers', { ...form, quantity: Number(form.quantity) });
+            const res = await api.post('/turnovers', { ...form, quantity: Number(form.quantity), ...(inspectionId ? { inspection_id: Number(inspectionId) } : {}) });
             navigate(`/turnovers/${res.data.turnover.id}`, {
                 state: { notice: 'Turnover submitted. Bring the item to the Supply Office so they can receive it.' },
             });
@@ -74,6 +84,12 @@ export default function TurnoverForm() {
                     <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>
                         <Alert>{message}</Alert>
                         <ErrorSummary errors={errors} labels={LABELS} />
+                        {inspection.data && (
+                            <p className="rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-900 ring-1 ring-blue-200">
+                                Based on pre-inspection report <span className="font-mono">{inspection.data.inspection.inspection_no}</span>, which found the item
+                                unserviceable.
+                            </p>
+                        )}
 
                         <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
                             <Select
@@ -116,6 +132,7 @@ export default function TurnoverForm() {
                             ))}
                         </Select>
 
+                        {!inspectionId && (
                         <fieldset aria-describedby={errors.condition ? 'condition-error' : undefined}>
                             <legend className="text-sm font-medium text-slate-700">
                                 Condition
@@ -153,7 +170,17 @@ export default function TurnoverForm() {
                                     {errors.condition}
                                 </p>
                             )}
+                            {form.condition === 'unserviceable' && (
+                                <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
+                                    Unserviceable equipment is inspected before it is turned over.{' '}
+                                    <Link to={`/inspections/new?line=${form.item_request_line_id}`} className="font-medium underline underline-offset-2">
+                                        Request a pre-inspection
+                                    </Link>{' '}
+                                    first. If the report finds it unserviceable, you turn it over from there.
+                                </p>
+                            )}
                         </fieldset>
+                        )}
 
                         <Textarea
                             label="Remarks (optional)"
@@ -169,7 +196,7 @@ export default function TurnoverForm() {
                             <Button variant="secondary" onClick={() => navigate(-1)}>
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={busy}>
+                            <Button type="submit" disabled={busy || (!inspectionId && form.condition === 'unserviceable')}>
                                 {busy ? 'Submitting…' : 'Submit turnover'}
                             </Button>
                         </div>

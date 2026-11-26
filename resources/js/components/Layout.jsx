@@ -1,4 +1,4 @@
-import { ArrowUUpLeft, Bell, Truck, UsersThree, ClipboardText, ClockCounterClockwise, List, Package, SignOut, SquaresFour } from '@phosphor-icons/react';
+import { Archive, ArrowUUpLeft, Bell, Truck, UsersThree, ClipboardText, ClockCounterClockwise, List, ListMagnifyingGlass, MagnifyingGlass, Package, ShoppingCart, SignOut, SquaresFour } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
@@ -11,7 +11,11 @@ const NAV = [
     { to: '/stocks', label: 'Stocks', icon: Package },
     { to: '/suppliers', label: 'Suppliers', icon: Truck, admin: true },
     { to: '/requests', label: 'Requests', icon: ClipboardText },
+    { to: '/inquiries', label: 'Availability', icon: ListMagnifyingGlass },
+    { to: '/purchase-requests', label: 'Purchase requests', icon: ShoppingCart },
     { to: '/turnovers', label: 'Turnovers', icon: ArrowUUpLeft },
+    { to: '/inspections', label: 'Inspections', icon: MagnifyingGlass },
+    { to: '/unserviceable', label: 'Unserviceable', icon: Archive, admin: true },
     { to: '/history', label: 'History', icon: ClockCounterClockwise },
     { to: '/accounts', label: 'Accounts', icon: UsersThree, admin: true },
 ];

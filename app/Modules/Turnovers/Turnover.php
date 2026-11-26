@@ -3,6 +3,7 @@
 namespace App\Modules\Turnovers;
 
 use App\Models\User;
+use App\Modules\Inspections\Inspection;
 use App\Modules\Requests\ItemRequestLine;
 use App\Support\Sequence;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /** Property Return Slip (PRS). */
 class Turnover extends Model
 {
-    protected $fillable = ['user_id', 'item_request_line_id', 'quantity', 'reason', 'condition', 'remarks'];
+    protected $fillable = ['user_id', 'item_request_line_id', 'inspection_id', 'quantity', 'reason', 'condition', 'remarks'];
 
     protected function casts(): array
     {
@@ -37,6 +38,17 @@ class Turnover extends Model
     public function line(): BelongsTo
     {
         return $this->belongsTo(ItemRequestLine::class, 'item_request_line_id');
+    }
+
+    /** The pre-inspection report this turnover follows, if any. */
+    public function inspection(): BelongsTo
+    {
+        return $this->belongsTo(Inspection::class);
+    }
+
+    public function iirup(): BelongsTo
+    {
+        return $this->belongsTo(Iirup::class);
     }
 
     public function decider(): BelongsTo

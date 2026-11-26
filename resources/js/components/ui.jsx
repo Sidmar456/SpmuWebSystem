@@ -1,4 +1,4 @@
-import { ArrowLeft, WarningCircle, X } from '@phosphor-icons/react';
+import { ArrowLeft, Check, WarningCircle, X } from '@phosphor-icons/react';
 import { useEffect, useId, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -150,6 +150,17 @@ const statusBadges = {
     cancelled: ['slate', 'Cancelled'],
     received: ['green', 'Received'],
     disabled: ['slate', 'Disabled'],
+    requested: ['amber', 'Requested'],
+    scheduled: ['blue', 'Scheduled'],
+    inspected: ['green', 'Inspected'],
+    submitted: ['amber', 'Submitted'],
+    answered: ['blue', 'Answered'],
+    returned: ['red', 'Returned'],
+    ordered: ['green', 'Ordered'],
+    delivered: ['blue', 'Delivered'],
+    available: ['green', 'Available'],
+    not_available: ['red', 'Not available'],
+    disposed: ['slate', 'Disposed'],
 };
 
 /** `label` replaces the default text, e.g. "For inspection" for a pending turnover. */
@@ -292,3 +303,42 @@ export function useErrorFocus(errors) {
 
 export const formatDateTime = (value) =>
     value ? new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+
+const stepState = {
+    done: ['bg-brand text-white ring-brand', 'completed'],
+    current: ['bg-white text-brand ring-2 ring-brand', 'current step'],
+    upcoming: ['bg-white text-slate-500 ring-slate-300', 'not started'],
+};
+
+/** Where a multi-step process stands. `steps`: [{ label, detail, done }]. State is in text too, not colour alone. */
+export function ProgressSteps({ label, steps }) {
+    const current = steps.findIndex((s) => !s.done);
+    return (
+        <ol aria-label={label} className="grid gap-3 lg:flex lg:gap-0">
+            {steps.map((s, i) => {
+                const state = s.done ? 'done' : i === current ? 'current' : 'upcoming';
+                const [circle, text] = stepState[state];
+                return (
+                    <li key={s.label} aria-current={state === 'current' ? 'step' : undefined} className="flex gap-3 lg:flex-1 lg:flex-col lg:gap-2">
+                        <div className="flex items-center">
+                            <span className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold tabular-nums ring-1 ${circle}`}>
+                                {s.done ? <Check size={14} weight="bold" aria-hidden="true" /> : i + 1}
+                            </span>
+                            {i < steps.length - 1 && <span aria-hidden="true" className={`mx-2 hidden h-0.5 flex-1 lg:block ${s.done ? 'bg-brand' : 'bg-slate-200'}`} />}
+                        </div>
+                        <div className="min-w-0 lg:pr-2">
+                            <p className={`text-sm font-medium ${state === 'upcoming' ? 'text-slate-500' : 'text-slate-900'}`}>
+                                {s.label}
+                                <span className="sr-only"> ({text})</span>
+                            </p>
+                            {s.detail && <p className="text-xs break-words text-slate-500">{s.detail}</p>}
+                        </div>
+                    </li>
+                );
+            })}
+        </ol>
+    );
+}
+
+/** Philippine peso, two decimals. Accepts numbers or the decimal strings Laravel returns. */
+export const formatPeso = (value) => Number(value ?? 0).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });

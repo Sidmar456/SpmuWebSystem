@@ -41,8 +41,8 @@ Changed your mind? Open a **Pending** request and click **Cancel request**.
 1. **Turnovers**. "Property in your care" lists the property items issued to you.
 2. Click **Turn over** next to the item. Choose the quantity, the reason, and the condition:
    - **Serviceable**: it still works and goes back to stock.
-   - **Unserviceable**: broken or worn out, for disposal.
-3. **Submit turnover**. It shows **For inspection**. Bring the item to the Supply Office; it stays under your name until they inspect it.
+   - **Unserviceable**: broken or worn out. Request a pre-inspection first (**Request inspection** next to the item). When the report says unserviceable, its **Turn over item** button opens this form already filled in.
+3. **Submit turnover**. It shows **For receiving**. Bring the item to the Supply Office; it stays under your name until they receive it.
 4. The bell tells you the result:
    - **Received · cleared**: the item is no longer under your name.
    - **Not accepted**: open the slip to see why, fix it, and submit a new turnover.
@@ -87,11 +87,31 @@ You see more menus: Dashboard, Suppliers and Accounts, plus the admin actions on
 3. When the requester comes: **Approved** tab, open it, **Issue items**, enter who received them. Stock is deducted now. If an item ran out in the meantime, nothing is deducted and you see which item is short.
 4. **Print** the RIS and have it signed.
 
+### Availability inquiries
+
+**Availability → Waiting for answer**: open an inquiry, **Answer**, and tag every item **Available** or **Not available** (add remarks if useful). The person is notified. Items tagged not available can go into a purchase request.
+
+### Purchase requests
+
+**Purchase requests** lists the PRs personnel prepared, from items you tagged not available or from a pre-inspection report (parts). Open one to see items and estimated costs, or **Print PR**.
+
+Each PR shows its office steps. Record them in order with **Record: <step>** as the papers come back: TWG verified, PR series no., then (after the BAC) BURS, funds, contract approved and PO signed. **Return for corrections** at the TWG step sends it back to the end user.
+
+When the whole order arrives: **Record delivery** (DR or invoice no.). After inspecting: **Record inspection (IAR)** with the accepted quantity of each item, and **Print IAR**.
+
+After the IAR: **Stock in and issue**. For each accepted item pick an existing stock item or create a new one (stock no., name, property or consumable), and enter who receives them. This makes an RIS; property also gets an ICS (below ₱50,000) or a PAR (₱50,000 and up). Print each for signatures.
+
+**BAC validators** open **Purchase requests**, then **Record: BAC validated** or **Return for corrections**, and later **Record: Bid awarded** with the supplier and amount.
+
 ### Turnovers
 
-**Turnovers → For inspection**, then **Inspect** when the item is at the counter:
+**Inspections**: set a date for each pre-inspection request, then **Record report** with the condition found. Unserviceable items are then turned over by the person.
+
+**Turnovers → For receiving**, then **Receive** when the item is at the counter:
 - **Accept**: set the condition you actually find. The person is cleared. Serviceable items go back to stock; unserviceable ones are recorded for disposal.
 - **Not accept**: write the reason (missing parts, wrong item). The item stays under the person's name.
+
+**Unserviceable**: received unserviceable items wait in the **Register** tab. Set each one's ARE no. on its turnover, tick the items, then **Create IIRUP** and print it for the disposal committee. On the IIRUP, **Schedule disposal** with the committee's date, then **Record disposal** (mode and date) after it is carried out.
 
 **Print** the PRS for signatures. The dashboard shows how long the oldest slip has waited, and at 7:00 AM you get a reminder for anything waiting more than 3 days.
 

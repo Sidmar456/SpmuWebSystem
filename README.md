@@ -4,7 +4,7 @@ Inventory Monitoring System for the Supply Office (Supply and Property Managemen
 
 Personnel request items online. The Supply Office monitors stock, keeps supplier information, approves and issues requests, and receives property turned over by personnel. Every request and turnover is kept in a history. Built with Laravel 12, React 19 and MariaDB/MySQL.
 
-> Status: every module and screen is built and tested (36 automated tests): accounts, stocks, suppliers and stock requests, request item (RIS), property turnover (PRS), history and reports, notifications and the dashboard. What is left is on site: deployment, backups, the one-week user acceptance test and training (S8.1–S8.4). The old PHP app is kept in `legacy/` for reference. See [docs/BACKLOG.md](docs/BACKLOG.md) for story status, and start with [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
+> Status: every module and screen is built and tested (56 automated tests): accounts, stocks, suppliers and stock requests, request item (RIS), property turnover (PRS), history and reports, notifications and the dashboard. What is left is on site: deployment, backups, the one-week user acceptance test and training (S8.1–S8.4). The old PHP app is kept in `legacy/` for reference. See [docs/BACKLOG.md](docs/BACKLOG.md) for story status, and start with [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
 
 ## Modules
 

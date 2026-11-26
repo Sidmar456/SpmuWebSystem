@@ -16,7 +16,12 @@ class Notify
 
     public static function admins(string $title, string $message, ?string $link = null): void
     {
-        $admins = User::where('role', Role::Admin)->where('status', AccountStatus::Approved)->get();
-        Notification::send($admins, new SupplyNotification($title, $message, $link));
+        self::role(Role::Admin, $title, $message, $link);
+    }
+
+    public static function role(Role $role, string $title, string $message, ?string $link = null): void
+    {
+        $users = User::where('role', $role)->where('status', AccountStatus::Approved)->get();
+        Notification::send($users, new SupplyNotification($title, $message, $link));
     }
 }

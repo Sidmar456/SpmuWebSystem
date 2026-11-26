@@ -1,10 +1,11 @@
-import { MagnifyingGlass, Printer } from '@phosphor-icons/react';
+import { HandArrowDown, Printer } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDateTime, Modal, Select, Spinner, StatusBadge, Textarea } from '../../components/ui';
+import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDateTime, Input, Modal, ProgressSteps, Select, Spinner, StatusBadge, Textarea } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { useAction } from '../../lib/useAction';
 import { useApi } from '../../lib/useApi';
+import { propertySteps } from '../inspections/steps';
 import { CONDITIONS, REASONS, TURNOVER_STATUS } from './labels';
 
 export default function TurnoverDetail() {
@@ -50,8 +51,8 @@ export default function TurnoverDetail() {
                     </Link>
                     {isAdmin && t.status === 'pending' && (
                         <Button onClick={() => setInspecting(true)}>
-                            <MagnifyingGlass size={18} weight="bold" aria-hidden="true" />
-                            Inspect
+                            <HandArrowDown size={18} aria-hidden="true" />
+                            Receive
                         </Button>
                     )}
                 </div>
@@ -59,6 +60,11 @@ export default function TurnoverDetail() {
 
             <Alert kind="success">{notice}</Alert>
             <Outcome turnover={t} isAdmin={isAdmin} />
+            {t.status !== 'rejected' && (
+                <Card title="Progress">
+                    <ProgressSteps label="Progress" steps={propertySteps({ inspection: t.inspection, turnover: t })} />
+                </Card>
+            )}
 
             <Card>
                 <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
@@ -80,24 +86,40 @@ export default function TurnoverDetail() {
                         <p className="text-xs text-slate-500">{t.user.office}</p>
                     </Detail>
                     <Detail label="Reason">{REASONS[t.reason] ?? t.reason}</Detail>
-                    <Detail label={t.status === 'pending' ? 'Condition (reported)' : 'Condition (inspected)'}>
+                    {t.iirup && (
+                        <Detail label="IIRUP">
+                            <Link to={`/iirups/${t.iirup.id}`} className="inline-flex min-h-11 items-center font-mono text-brand hover:underline sm:min-h-0">
+                                {t.iirup.iirup_no}
+                            </Link>
+                        </Detail>
+                    )}
+                    {t.inspection && (
+                        <Detail label="Pre-inspection report">
+                            <Link to={`/inspections/${t.inspection.id}`} className="inline-flex min-h-11 items-center font-mono text-brand hover:underline sm:min-h-0">
+                                {t.inspection.inspection_no}
+                            </Link>
+                        </Detail>
+                    )}
+                    <Detail label={t.status === 'pending' ? 'Condition (reported)' : 'Condition (on receipt)'}>
                         {CONDITIONS[t.condition]?.[0] ?? t.condition}
                         {t.status === 'received' && (
                             <p className="text-xs text-slate-500">{t.condition === 'serviceable' ? 'Added back to stock.' : 'Not added back to stock (for disposal).'}</p>
                         )}
                     </Detail>
                     {t.decider && (
-                        <Detail label="Inspected by">
+                        <Detail label="Received by">
                             {t.decider.name}
                             <p className="text-xs text-slate-500">{formatDateTime(t.decided_at)}</p>
                         </Detail>
                     )}
-                    {t.remarks && <Detail label={t.status === 'pending' ? 'Remarks' : 'Inspection remarks'}>{t.remarks}</Detail>}
+                    {t.remarks && <Detail label={t.status === 'pending' ? 'Remarks' : 'Receiving remarks'}>{t.remarks}</Detail>}
                 </dl>
             </Card>
 
-            <Modal open={inspecting} title={`Inspect ${t.turnover_no}`} onClose={() => setInspecting(false)}>
-                <InspectForm turnover={t} onDone={done} />
+            {isAdmin && t.status === 'received' && t.condition === 'unserviceable' && !t.iirup && <AreForm turnover={t} onDone={done} />}
+
+            <Modal open={inspecting} title={`Receive ${t.turnover_no}`} onClose={() => setInspecting(false)}>
+                <ReceiveForm turnover={t} onDone={done} />
             </Modal>
         </div>
     );
@@ -110,8 +132,8 @@ function Outcome({ turnover: t, isAdmin }) {
         return (
             <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
                 {isAdmin
-                    ? 'Waiting for inspection. Check the item at the counter, then click Inspect to accept or not accept it.'
-                    : 'Waiting for inspection. Bring the item to the Supply Office; it stays under your name until it is accepted.'}
+                    ? 'Waiting at the counter. Check the item, then click Receive to accept or not accept it.'
+                    : 'Waiting to be received. Bring the item to the Supply Office; it stays under your name until it is accepted.'}
             </p>
         );
     }
@@ -131,8 +153,8 @@ function Outcome({ turnover: t, isAdmin }) {
     );
 }
 
-/** One inspection step: record the condition found, then accept (clears the person) or not accept. */
-function InspectForm({ turnover, onDone }) {
+/** Counter check: record the condition found, then accept (clears the person) or not accept. */
+function ReceiveForm({ turnover, onDone }) {
     const [decision, setDecision] = useState('accept');
     const [condition, setCondition] = useState(turnover.condition);
     const [remarks, setRemarks] = useState('');
@@ -206,7 +228,7 @@ function InspectForm({ turnover, onDone }) {
             )}
 
             <Textarea
-                label={decision === 'accept' ? 'Inspection remarks (optional)' : 'Reason'}
+                label={decision === 'accept' ? 'Receiving remarks (optional)' : 'Reason'}
                 name="remarks"
                 required={decision === 'reject'}
                 hint={decision === 'accept' ? 'e.g. serial number checked, scratches on the cover.' : 'Shown to the person, so they know what to fix.'}
@@ -221,5 +243,39 @@ function InspectForm({ turnover, onDone }) {
                 </Button>
             </div>
         </form>
+    );
+}
+
+/** Unserviceable stockroom register: the ARE number this item is indexed to. */
+function AreForm({ turnover, onDone }) {
+    const [areNo, setAreNo] = useState(turnover.are_no ?? '');
+    const { errors, message, busy, formRef, run } = useAction(['are_no']);
+
+    function submit(e) {
+        e.preventDefault();
+        run(`/turnovers/${turnover.id}/are`, { are_no: areNo }, () => onDone(`Indexed to ${areNo} in the unserviceable register.`));
+    }
+
+    return (
+        <Card title="Unserviceable stockroom">
+            <form ref={formRef} onSubmit={submit} className="flex flex-wrap items-end gap-3" noValidate>
+                <div className="min-w-48 flex-1">
+                    <Input
+                        label="ARE no."
+                        name="are_no"
+                        required
+                        maxLength={50}
+                        hint="The ARE this returned item is indexed to. The PRS serves as its supply return slip."
+                        value={areNo}
+                        onChange={(e) => setAreNo(e.target.value)}
+                        error={errors.are_no}
+                    />
+                </div>
+                <Button type="submit" disabled={busy || !areNo.trim() || areNo === turnover.are_no}>
+                    {busy ? 'Saving…' : 'Save ARE no.'}
+                </Button>
+            </form>
+            <Alert>{message}</Alert>
+        </Card>
     );
 }

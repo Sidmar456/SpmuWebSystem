@@ -9,9 +9,23 @@ export const REASONS = {
 
 // What each turnover status means to the person returning the item.
 export const TURNOVER_STATUS = {
-    pending: 'For inspection',
+    pending: 'For receiving',
     received: 'Received · cleared',
     rejected: 'Not accepted',
+};
+
+export const IIRUP_STATUS = {
+    submitted: 'Submitted to committee',
+    scheduled: 'Disposal scheduled',
+    disposed: 'Disposed',
+};
+
+export const DISPOSAL_METHODS = {
+    sale: 'Sale (public auction or negotiation)',
+    transfer: 'Transfer to another agency',
+    destruction: 'Destruction or condemnation',
+    donation: 'Donation',
+    other: 'Other',
 };
 
 export const CONDITIONS = {

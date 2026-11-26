@@ -62,6 +62,12 @@ class User extends Authenticatable
         return $this->role === Role::Admin;
     }
 
+    /** BAC member: validates purchase requests and records the bidding. */
+    public function isValidator(): bool
+    {
+        return $this->role === Role::Validator;
+    }
+
     /** Property units issued to this person and not yet returned (pending turnovers still count). */
     public function heldPropertyQuantity(): int
     {

@@ -7,7 +7,18 @@ import { AuthProvider, useAuth } from './lib/auth';
 import AccountList from './pages/accounts/AccountList';
 import Login from './pages/auth/Login';
 import { ForgotPassword, ResetPassword } from './pages/auth/PasswordReset';
-import { ClearanceSlip, RequestSlip, TurnoverSlip } from './pages/print/Slips';
+import { ClearanceSlip, IirupSlip, InquirySlip, IarSlip, IcsSlip, InspectionSlip, ParSlip, PurchaseRequestSlip, RequestSlip, TurnoverSlip } from './pages/print/Slips';
+import PurchaseRequestDetail from './pages/procurement/PurchaseRequestDetail';
+import PurchaseRequestForm from './pages/procurement/PurchaseRequestForm';
+import PurchaseRequestList from './pages/procurement/PurchaseRequestList';
+import InquiryDetail from './pages/procurement/InquiryDetail';
+import InquiryForm from './pages/procurement/InquiryForm';
+import InquiryList from './pages/procurement/InquiryList';
+import IirupDetail from './pages/turnovers/IirupDetail';
+import Unserviceable from './pages/turnovers/Unserviceable';
+import InspectionDetail from './pages/inspections/InspectionDetail';
+import InspectionForm from './pages/inspections/InspectionForm';
+import InspectionList from './pages/inspections/InspectionList';
 import Dashboard from './pages/dashboard/Dashboard';
 import History from './pages/history/History';
 import Notifications from './pages/notifications/Notifications';
@@ -63,6 +74,13 @@ function App() {
                 <Route path="/requests/:id/print" element={<RequestSlip />} />
                 <Route path="/turnovers/:id/print" element={<TurnoverSlip />} />
                 <Route path="/clearance/:id" element={<ClearanceSlip />} />
+                <Route path="/inspections/:id/print" element={<InspectionSlip />} />
+                <Route path="/iirups/:id/print" element={<IirupSlip />} />
+                <Route path="/inquiries/:id/print" element={<InquirySlip />} />
+                <Route path="/purchase-requests/:id/print" element={<PurchaseRequestSlip />} />
+                <Route path="/purchase-requests/:id/iar" element={<IarSlip />} />
+                <Route path="/purchase-requests/:id/ics" element={<IcsSlip />} />
+                <Route path="/purchase-requests/:id/par" element={<ParSlip />} />
                 <Route element={<Layout />}>
                     <Route index element={<Home />} />
                     <Route path="/stocks" element={<ItemList />} />
@@ -73,11 +91,22 @@ function App() {
                     <Route path="/turnovers" element={<TurnoverList />} />
                     <Route path="/turnovers/new" element={<TurnoverForm />} />
                     <Route path="/turnovers/:id" element={<TurnoverDetail />} />
+                    <Route path="/inquiries" element={<InquiryList />} />
+                    <Route path="/inquiries/new" element={<InquiryForm />} />
+                    <Route path="/inquiries/:id" element={<InquiryDetail />} />
+                    <Route path="/purchase-requests" element={<PurchaseRequestList />} />
+                    <Route path="/purchase-requests/new" element={<PurchaseRequestForm />} />
+                    <Route path="/purchase-requests/:id" element={<PurchaseRequestDetail />} />
+                    <Route path="/inspections" element={<InspectionList />} />
+                    <Route path="/inspections/new" element={<InspectionForm />} />
+                    <Route path="/inspections/:id" element={<InspectionDetail />} />
                     <Route path="/history" element={<History />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route element={<RequireAuth admin />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/accounts" element={<AccountList />} />
+                        <Route path="/unserviceable" element={<Unserviceable />} />
+                        <Route path="/iirups/:id" element={<IirupDetail />} />
                         <Route path="/suppliers" element={<SupplierList />} />
                         <Route path="/suppliers/new" element={<SupplierForm />} />
                         <Route path="/suppliers/:id" element={<SupplierDetail />} />

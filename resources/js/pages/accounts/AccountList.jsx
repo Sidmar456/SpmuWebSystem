@@ -1,4 +1,4 @@
-import { Check, Prohibit, ShieldCheck, User, X } from '@phosphor-icons/react';
+import { Check, ClipboardText, Prohibit, ShieldCheck, User, X } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Alert, Badge, Button, buttonClass, Card, EmptyState, formatDateTime, Modal, Pagination, Spinner, StatusBadge } from '../../components/ui';
@@ -34,12 +34,21 @@ const CONFIRM = {
     }),
     admin: (u) => ({
         title: `Make ${u.name} an admin?`,
-        body: 'Admins can approve and issue requests, change stock, inspect turnovers, and manage suppliers and accounts.',
+        body: 'Admins can approve and issue requests, change stock, inspect equipment, receive turnovers, and manage suppliers and accounts.',
         label: 'Make admin',
         variant: 'primary',
         url: `/accounts/${u.id}/role`,
         payload: { role: 'admin' },
         done: `${u.name} is now an admin.`,
+    }),
+    validator: (u) => ({
+        title: `Make ${u.name} a BAC validator?`,
+        body: 'Validators check purchase requests before the Supply Office approves them. They can still request items like personnel, but lose any admin screens.',
+        label: 'Make validator',
+        variant: 'primary',
+        url: `/accounts/${u.id}/role`,
+        payload: { role: 'validator' },
+        done: `${u.name} is now a BAC validator.`,
     }),
     user: (u) => ({
         title: `Make ${u.name} personnel?`,
@@ -51,6 +60,13 @@ const CONFIRM = {
         done: `${u.name} is now personnel.`,
     }),
 };
+
+// [role, button label, icon]: an approved account shows the two roles it does not have.
+const ROLE_BUTTONS = [
+    ['admin', 'Make admin', ShieldCheck],
+    ['validator', 'Make validator', ClipboardText],
+    ['user', 'Make personnel', User],
+];
 
 export default function AccountList() {
     const { user: me } = useAuth();
@@ -121,6 +137,7 @@ export default function AccountList() {
                                             <p className="flex flex-wrap items-center gap-2 font-medium text-slate-900">
                                                 {u.name}
                                                 {u.role === 'admin' && <Badge color="blue">Admin</Badge>}
+                                                {u.role === 'validator' && <Badge color="amber">BAC validator</Badge>}
                                                 <StatusBadge status={u.status} />
                                                 {u.id === me.id && <Badge>You</Badge>}
                                             </p>
@@ -152,10 +169,12 @@ export default function AccountList() {
                                             )}
                                             {u.status === 'approved' && u.id !== me.id && (
                                                 <>
-                                                    <Button variant="secondary" onClick={() => ask(u.role === 'admin' ? 'user' : 'admin', u)}>
-                                                        {u.role === 'admin' ? <User size={18} aria-hidden="true" /> : <ShieldCheck size={18} aria-hidden="true" />}
-                                                        {u.role === 'admin' ? 'Make personnel' : 'Make admin'}
-                                                    </Button>
+                                                    {ROLE_BUTTONS.filter(([role]) => role !== u.role).map(([role, label, Icon]) => (
+                                                        <Button key={role} variant="secondary" onClick={() => ask(role, u)}>
+                                                            <Icon size={18} aria-hidden="true" />
+                                                            {label}
+                                                        </Button>
+                                                    ))}
                                                     <Button variant="secondary" onClick={() => ask('disable', u)}>
                                                         <Prohibit size={18} aria-hidden="true" />
                                                         Disable

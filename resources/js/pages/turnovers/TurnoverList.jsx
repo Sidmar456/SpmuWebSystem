@@ -1,4 +1,4 @@
-import { ArrowUUpLeft, Certificate } from '@phosphor-icons/react';
+import { ArrowUUpLeft, Certificate, MagnifyingGlass } from '@phosphor-icons/react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Alert, buttonClass, Card, EmptyState, formatDateTime, Pagination, Spinner, StatusBadge } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
@@ -7,7 +7,7 @@ import { CONDITIONS, TURNOVER_STATUS } from './labels';
 
 const STATUSES = [
     ['', 'All'],
-    ['pending', 'For inspection'],
+    ['pending', 'For receiving'],
     ['received', 'Received · cleared'],
     ['rejected', 'Not accepted'],
 ];
@@ -31,7 +31,7 @@ export default function TurnoverList() {
             <div>
                 <h1 className="text-xl font-semibold text-slate-900">{isAdmin ? 'Property turnovers' : 'My property'}</h1>
                 <p className="text-sm text-slate-600">
-                    {isAdmin ? 'Inspect returned property, then accept it (the person is cleared) or not accept it (PRS).' : 'Property issued to you, and the items you have returned (PRS).'}
+                    {isAdmin ? 'Receive returned property at the counter, then accept it (the person is cleared) or not accept it (PRS).' : 'Property issued to you, and the items you have returned (PRS).'}
                 </p>
             </div>
 
@@ -112,8 +112,8 @@ export default function TurnoverList() {
                                                     <div className="flex flex-wrap items-center gap-2">
                                                         <StatusBadge status={t.status} label={TURNOVER_STATUS[t.status]} />
                                                         {isAdmin && t.status === 'pending' && (
-                                                            <Link to={`/turnovers/${t.id}`} className={buttonClass('primary')} aria-label={`Inspect ${t.turnover_no}`}>
-                                                                Inspect
+                                                            <Link to={`/turnovers/${t.id}`} className={buttonClass('primary')} aria-label={`Receive ${t.turnover_no}`}>
+                                                                Receive
                                                             </Link>
                                                         )}
                                                     </div>
@@ -170,14 +170,20 @@ function Holdings() {
                                             {pending > 0 && ` · ${pending} awaiting turnover`}
                                         </p>
                                     </div>
-                                    {line.turnable_quantity > 0 ? (
-                                        <Link to={`/turnovers/new?line=${line.id}`} className={buttonClass('secondary')} aria-label={`Turn over ${line.item.name}`}>
-                                            <ArrowUUpLeft size={18} aria-hidden="true" />
-                                            Turn over
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Link to={`/inspections/new?line=${line.id}`} className={buttonClass('ghost')} aria-label={`Request inspection of ${line.item.name}`}>
+                                            <MagnifyingGlass size={18} aria-hidden="true" />
+                                            Request inspection
                                         </Link>
-                                    ) : (
-                                        <span className="text-sm text-slate-500">Turnover pending</span>
-                                    )}
+                                        {line.turnable_quantity > 0 ? (
+                                            <Link to={`/turnovers/new?line=${line.id}`} className={buttonClass('secondary')} aria-label={`Turn over ${line.item.name}`}>
+                                                <ArrowUUpLeft size={18} aria-hidden="true" />
+                                                Turn over
+                                            </Link>
+                                        ) : (
+                                            <span className="text-sm text-slate-500">Turnover pending</span>
+                                        )}
+                                    </div>
                                 </li>
                             );
                         })}

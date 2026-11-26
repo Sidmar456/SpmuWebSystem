@@ -16,6 +16,8 @@ Tags: module (`core`, `accounts`, `stocks`, `suppliers`, `requests`, `turnovers`
 | E6 Request history and reports | M6 | history, dashboard |
 | E7 User interface | M7 | ui |
 | E8 Launch | M8 | core |
+| E9 Inspection and disposal | M9 | inspections, turnovers |
+| E10 Procurement | M10 | procurement, stocks, requests |
 
 ## Status
 
@@ -73,6 +75,18 @@ Checked against the code on 25 Nov 2026 (branch `laravel-rewrite`). Update this 
 | S8.2 | Daily backups and a restore test | Ready: scripts tested locally |
 | S8.3 | Opening balances and user acceptance test | Ready: run with the office |
 | S8.4 | User guide and training | Guide done; training not held |
+| S9.1 | Request a pre-inspection of issued equipment | Done |
+| S9.2 | Schedule and record the pre-inspection report | Done |
+| S9.3 | Route the outcome: turn over, or purchase request | Done |
+| S9.4 | Unserviceable stockroom register and return slip | Done |
+| S9.5 | Consolidated IIRUP | Done |
+| S9.6 | Disposal schedule and record | Done |
+| S10.1 | Availability inquiry and "not available" tag | Done |
+| S10.2 | Purchase request (PR) from unavailable items | Done |
+| S10.3 | BAC validation, then Supply Office approval | Done |
+| S10.4 | Delivery, inspection request and IAR | Done |
+| S10.5 | Accept delivered items into stock and issue | Done |
+| S10.6 | ICS and PAR slips | Done |
 
 ---
 
@@ -181,3 +195,42 @@ React 19 in `resources/js`, built by Vite through `laravel-vite-plugin`, served 
 **S8.2 Daily backups and a restore test** `core` **S** — `scripts/backup.bat` daily; `scripts/restore-test.bat` checks a dump (row counts, item quantities equal their stock movements). See [DEPLOYMENT.md](DEPLOYMENT.md) section 9.
 **S8.3 Opening balances and user acceptance test** `core` **M** — physical count entered with **Stock in**. Supply Office staff and 2 to 3 offices run [UAT.md](UAT.md) for one week. Sign-off by the Supply Office head.
 **S8.4 User guide and training** `core` **S** — [USER_GUIDE.md](USER_GUIDE.md), with the training plan in Part 3.
+
+## M9 Inspection and disposal
+
+Source: the office's "Turning over unserviceable equipment" flow (`END USER.docx`). The Supply Office acts as the inspectorate team, so admins do every inspection step. No new role.
+
+Aligned to the flow (26 Nov 2026): personnel cannot turn over equipment as unserviceable without a pre-inspection report that found it unserviceable. The counter can still mark an item unserviceable on receipt. The turnover counter step is called **Receive**, so "inspection" means only the pre-inspection. Inspection and turnover pages show one progress stepper: Requested, Scheduled, Inspected, Turned over, Received, In stockroom, IIRUP, Disposed.
+
+**S9.1 Request a pre-inspection** `inspections` `user` **S**
+- From **Property in your care**, the person picks an issued property item and describes the problem. This creates a pre-inspection request `PIR-YYYY-NNNN`, and admins are notified.
+- One open request per item at a time. The person can cancel a request until it is inspected.
+
+**S9.2 Schedule and record the pre-inspection report** `inspections` `admin` **S**
+- The admin sets an inspection date, and the person is notified.
+- The admin records the outcome and findings. Outcomes: `unserviceable`, `replacement`, `repair`, `recoverable`. The person is notified with the next step.
+- Printable pre-inspection report.
+
+**S9.3 Route the outcome** `inspections` `both` **S**
+- `unserviceable`: the person is told to turn the item over. The turnover form opens with the item, the reason and the condition filled in, and the PRS links back to the report.
+- `replacement`, `repair`, `recoverable`: the person prepares a purchase request for parts, with the report attached (links to S10.2).
+
+**S9.4 Unserviceable stockroom register** `turnovers` `admin` **S**
+- Received unserviceable turnovers are listed in a register (unserviceable stockroom). The PRS serves as the supply return slip. Record the ARE number each item was indexed to.
+
+**S9.5 Consolidated IIRUP** `turnovers` `admin` **M**
+- The admin picks register items not yet in an IIRUP and creates an Inventory and Inspection Report of Unserviceable Property. It is printable and marked submitted to the disposal committee.
+
+**S9.6 Disposal schedule and record** `turnovers` `admin` **S**
+- Set a disposal date on an IIRUP. Then mark it disposed, with the method and the date. Its items leave the register.
+
+## M10 Procurement
+
+Source: the office's "Procurement of goods and services" flow (`END USER.docx`, `PR.jpg`). In the system: the end user, the Supply Office (also the inspectorate) and the BAC `validator` account. The BAC validates the PR (or returns it with remarks), then records the bidding result and award recommendation; Supply proceeds only after BAC validates. TWG, Procurement, Budget, OP and Accounting have no accounts: the Supply Office ticks each of their steps with a date (TWG verified, PR no. assigned, contract approved, PO signed), shown on the PR progress stepper. Payment (voucher, ADA, check) is out of scope.
+
+**S10.1 Availability inquiry** `procurement` `both` **S** — Done. **Availability → New inquiry**: free-text lines (description, unit, quantity), number `SAI-YYYY-NNNN`. Supply answers every line at once: available, or "not available" with remarks. Printable SAI (a PR supporting document).
+**S10.2 Purchase request** `procurement` `user` **M** — Done. `PR-YYYY-NNNN` from an answered SAI (only lines tagged not available; each SAI line in one PR only) or from a pre-inspection report found for replacement, repair or recoverable (free-text parts lines). Specifications, quantity, estimated unit cost, totals. Printable, with a blank PR series no. for Procurement.
+**S10.3 BAC validation and office steps** `procurement` `both` **M** — Done. Steps in order, each recorded with a date: TWG verified, PR series no. assigned, BAC validated, bid awarded (supplier, amount), BURS certified, funds certified, contract approved (OP), PO signed (PO no.). BAC steps belong to the `validator` role, the rest to the Supply Office. TWG and BAC can return the PR with remarks; the end user corrects specs, quantities and costs and resubmits, and the steps start over. PO signed sets the status to `ordered`.
+**S10.4 Delivery and IAR** `procurement` `admin` **M** — Done. On a PR with a signed PO: **Record delivery** (full delivery, DR or invoice no., date), then **Record inspection (IAR)** with the accepted quantity per line (a reason is required when anything is not accepted). `IAR-YYYY-NNNN`, printable. Status `ordered` then `delivered` then `inspected`. Replacement deliveries for non-accepted items stay on paper.
+**S10.5 Accept into stock and issue** `procurement` `admin` **S** — Done. **Stock in and issue** on an inspected PR: each accepted line maps to an existing stock item or a new one; stock goes in through the ledger (ref IAR no.) and straight out on a new RIS for the end user, already issued. PR status `issued`. Issued property shows in the person's care, so it can be turned over later.
+**S10.6 ICS and PAR slips** `procurement` `admin` **S** — Done. At issue, property lines below `SPMU_PAR_THRESHOLD` (default 50,000, `config/spmu.php`) get an ICS no., at or above it a PAR no., by the PR unit cost. Printable ICS and PAR.

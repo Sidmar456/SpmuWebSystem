@@ -6,7 +6,7 @@ import { useApi } from '../../lib/useApi';
 const CARDS = [
     ['pending_requests', 'Requests to review', '/requests?status=pending'],
     ['to_issue', 'Approved, waiting to be issued', '/requests?status=approved'],
-    ['pending_turnovers', 'Turnovers to inspect', '/turnovers?status=pending'],
+    ['pending_turnovers', 'Turnovers to receive', '/turnovers?status=pending'],
     ['low_stock', 'Low stock items', '/stocks?status=low_stock'],
     ['out_of_stock', 'Out of stock items', '/stocks?status=out_of_stock'],
     ['pending_accounts', 'Accounts waiting for approval', '/accounts?status=pending'],

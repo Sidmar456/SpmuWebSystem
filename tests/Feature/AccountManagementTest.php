@@ -113,4 +113,15 @@ class AccountManagementTest extends TestCase
         $this->actingAs($ben->fresh())->postJson("/api/accounts/{$admin->id}/role", ['role' => 'user'])->assertOk();
         $this->actingAs($admin->fresh())->postJson("/api/accounts/{$ben->id}/role", ['role' => 'user'])->assertForbidden();
     }
+
+    public function test_admin_can_make_a_bac_validator_who_has_no_admin_access(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $carla = User::factory()->create();
+
+        $this->actingAs($admin)->postJson("/api/accounts/{$carla->id}/role", ['role' => 'validator'])->assertOk();
+        $this->assertSame(Role::Validator, $carla->fresh()->role);
+
+        $this->actingAs($carla->fresh())->getJson('/api/accounts')->assertForbidden();
+    }
 }

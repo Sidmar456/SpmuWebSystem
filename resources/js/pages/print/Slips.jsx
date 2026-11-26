@@ -1,10 +1,12 @@
 import { Printer } from "@phosphor-icons/react";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Alert, buttonClass, Spinner } from "../../components/ui";
+import { Alert, buttonClass, formatPeso, Spinner } from "../../components/ui";
 import { useAuth } from "../../lib/auth";
 import { useApi } from "../../lib/useApi";
-import { CONDITIONS, REASONS } from "../turnovers/labels";
+import { OUTCOMES } from "../inspections/labels";
+import { AVAILABILITY } from "../procurement/labels";
+import { CONDITIONS, DISPOSAL_METHODS, REASONS } from "../turnovers/labels";
 
 const date = (value) =>
     value
@@ -192,6 +194,7 @@ export function TurnoverSlip() {
                 ["Date", date(t.created_at)],
                 ["Issued through", t.line.request.request_no],
                 ["Reason", REASONS[t.reason] ?? t.reason],
+                ...(t.inspection ? [["Pre-inspection report", t.inspection.inspection_no]] : []),
             ]}
             columns={[
                 ["Stock no."],
@@ -256,3 +259,226 @@ export function ClearanceSlip() {
         />
     );
 }
+
+/** Pre-inspection report, given to the person after the Supply Office (inspectorate) checks the equipment. */
+export function InspectionSlip() {
+    const { id } = useParams();
+    const { data, error, loading } = useApi(`/inspections/${id}`);
+    if (loading && !data) return <Spinner />;
+    if (error) return <Alert>{error}</Alert>;
+    const i = data.inspection;
+    const [outcome, next] = OUTCOMES[i.outcome] ?? [i.outcome ?? "", ""];
+
+    return (
+        <Slip
+            title="Pre-Inspection Report"
+            number={i.inspection_no}
+            backTo={`/inspections/${i.id}`}
+            fields={[
+                ["End user", i.user.name],
+                ["Office", i.user.office],
+                ["Date requested", date(i.created_at)],
+                ["Date inspected", date(i.inspected_at)],
+                ["Issued through", i.line.request.request_no],
+                ["Condition found", outcome],
+            ]}
+            note={
+                <>
+                    <strong>Problem reported:</strong> {i.problem}
+                    <br />
+                    <strong>Findings:</strong> {i.findings}
+                    <br />
+                    <strong>Recommendation:</strong> {next}
+                </>
+            }
+            columns={[["Stock / property no."], ["Description"], ["Unit"]]}
+            rows={[[i.line.item.stock_no, i.line.item.name, i.line.item.unit]]}
+            signatures={[
+                ["Inspected by", i.inspector?.name, i.inspected_at],
+                ["Received by (end user)", i.user.name, null],
+            ]}
+        />
+    );
+}
+
+/** IIRUP for the disposal committee. Cost columns are filled in by hand: items have no unit cost yet. */
+export function IirupSlip() {
+    const { id } = useParams();
+    const { data, error, loading } = useApi(`/iirups/${id}`);
+    if (loading && !data) return <Spinner />;
+    if (error) return <Alert>{error}</Alert>;
+    const r = data.iirup;
+
+    return (
+        <Slip
+            title="Inventory and Inspection Report of Unserviceable Property"
+            number={r.iirup_no}
+            backTo={`/iirups/${r.id}`}
+            fields={[
+                ["Date", date(r.created_at)],
+                ["Items", r.turnovers.length],
+                ["Disposal date", date(r.disposal_date)],
+                ["Mode of disposal", DISPOSAL_METHODS[r.disposal_method] ?? ""],
+            ]}
+            note={r.remarks}
+            columns={[["Date acquired"], ["Particulars"], ["Property no."], ["Qty", "right"], ["Unit cost", "right"], ["Total cost", "right"], ["PRS no."], ["ARE no."]]}
+            rows={r.turnovers.map((t) => ["", t.line.item.name, t.line.item.stock_no, `${t.quantity} ${t.line.item.unit}`, "", "", t.turnover_no, t.are_no])}
+            signatures={[
+                ["Prepared by (Supply Officer)", r.creator?.name, r.created_at],
+                ["Inspected by", "", null],
+                ["Approved by (Disposal Committee)", "", null],
+                ["Witness to disposal", "", r.disposed_on],
+            ]}
+        />
+    );
+}
+
+/** Supplies Availability Inquiry (SAI): attached to a purchase request for items tagged not available. */
+export function InquirySlip() {
+    const { id } = useParams();
+    const { data, error, loading } = useApi(`/inquiries/${id}`);
+    if (loading && !data) return <Spinner />;
+    if (error) return <Alert>{error}</Alert>;
+    const q = data.inquiry;
+
+    return (
+        <Slip
+            title="Supplies Availability Inquiry"
+            number={q.inquiry_no}
+            backTo={`/inquiries/${q.id}`}
+            fields={[
+                ["End user", q.user.name],
+                ["Office", q.office],
+                ["Date", date(q.created_at)],
+                ["Purpose", q.purpose],
+            ]}
+            columns={[["Item and specifications"], ["Unit"], ["Quantity", "right"], ["Availability"], ["Remarks"]]}
+            rows={q.lines.map((l) => [l.description, l.unit, l.quantity, AVAILABILITY[l.availability]?.[0] ?? "", l.remarks ?? ""])}
+            signatures={[
+                ["Requested by", q.user.name, q.created_at],
+                ["Checked by (Supply Office)", q.answerer?.name, q.answered_at],
+            ]}
+        />
+    );
+}
+
+/** Purchase Request (PR). The PR series no. prints once Procurement's step is recorded. */
+export function PurchaseRequestSlip() {
+    const { id } = useParams();
+    const { data, error, loading } = useApi(`/purchase-requests/${id}`);
+    if (loading && !data) return <Spinner />;
+    if (error) return <Alert>{error}</Alert>;
+    const pr = data.purchase_request;
+    const total = pr.lines.reduce((sum, l) => sum + l.quantity * Number(l.unit_cost), 0);
+
+    return (
+        <Slip
+            title="Purchase Request"
+            number={pr.pr_no}
+            backTo={`/purchase-requests/${pr.id}`}
+            fields={[
+                ["Office", pr.office],
+                ["Date", date(pr.created_at)],
+                ["Based on", pr.inquiry?.inquiry_no ?? pr.inspection?.inspection_no],
+                ["PR series no.", pr.steps.find((s) => s.step === "series_assigned")?.details?.series_no ?? ""],
+            ]}
+            note={`Purpose: ${pr.purpose}`}
+            columns={[["Unit"], ["Item description"], ["Quantity", "right"], ["Est. unit cost", "right"], ["Est. total cost", "right"]]}
+            rows={[
+                ...pr.lines.map((l) => [l.unit, l.description, l.quantity, formatPeso(l.unit_cost), formatPeso(l.quantity * Number(l.unit_cost))]),
+                ["", "Total", "", "", formatPeso(total)],
+            ]}
+            signatures={[
+                ["Requested by", pr.user.name, pr.created_at],
+                ["Verified by (TWG)", "", null],
+                ["Approved by", "", null],
+            ]}
+        />
+    );
+}
+
+/** Inspection and Acceptance Report (IAR), from the PR's delivery and inspection. */
+export function IarSlip() {
+    const { id } = useParams();
+    const { data, error, loading } = useApi(`/purchase-requests/${id}`);
+    if (loading && !data) return <Spinner />;
+    if (error) return <Alert>{error}</Alert>;
+    const pr = data.purchase_request;
+    const step = (name) => pr.steps.find((s) => s.step === name)?.details ?? {};
+
+    return (
+        <Slip
+            title="Inspection and Acceptance Report"
+            number={pr.iar_no}
+            backTo={`/purchase-requests/${pr.id}`}
+            fields={[
+                ["Supplier", step("bid_awarded").awarded_to],
+                ["PO no.", step("po_signed").po_no],
+                ["Requisitioning office", pr.office],
+                ["PR no.", `${pr.pr_no}${step("series_assigned").series_no ? ` (${step("series_assigned").series_no})` : ""}`],
+                ["Invoice / DR no.", pr.delivery_ref],
+                ["Date delivered", date(pr.delivered_on)],
+            ]}
+            note={pr.inspection_remarks && `Remarks: ${pr.inspection_remarks}`}
+            columns={[["Unit"], ["Description"], ["Quantity delivered", "right"], ["Quantity accepted", "right"]]}
+            rows={pr.lines.map((l) => [l.unit, l.description, l.quantity, l.quantity_accepted])}
+            signatures={[
+                ["Inspected and verified by (Inspectorate)", pr.inspector?.name, pr.inspected_on],
+                ["Received and accepted by (Supply Officer)", "", pr.inspected_on],
+            ]}
+        />
+    );
+}
+
+/**
+ * ICS (semi-expendable, below the PAR threshold) or PAR (at or above it): property lines of an issued PR,
+ * split by the PR unit cost.
+ */
+function PropertySlip({ kind }) {
+    const { id } = useParams();
+    const { data, error, loading } = useApi(`/purchase-requests/${id}`);
+    if (loading && !data) return <Spinner />;
+    if (error) return <Alert>{error}</Alert>;
+    const pr = data.purchase_request;
+    const par = kind === "par";
+    const lines = pr.lines.filter((l) => l.quantity_accepted > 0 && l.item?.type === "property" && (Number(l.unit_cost) >= data.par_threshold) === par);
+    const issuedAt = pr.item_request?.issued_at;
+
+    return (
+        <Slip
+            title={par ? "Property Acknowledgement Receipt" : "Inventory Custodian Slip"}
+            number={par ? pr.par_no : pr.ics_no}
+            backTo={`/purchase-requests/${pr.id}`}
+            fields={[
+                ["Entity", "Zamboanga Peninsula Polytechnic State University"],
+                ["Office", pr.office],
+                ["RIS no.", pr.item_request?.request_no],
+                ["Date", date(issuedAt)],
+            ]}
+            columns={
+                par
+                    ? [["Quantity", "right"], ["Unit"], ["Description"], ["Property no."], ["Date acquired"], ["Amount", "right"]]
+                    : [["Quantity", "right"], ["Unit"], ["Unit cost", "right"], ["Total cost", "right"], ["Description"], ["Inventory item no."], ["Est. useful life"]]
+            }
+            rows={lines.map((l) =>
+                par
+                    ? [l.quantity_accepted, l.unit, l.item.name, l.item.stock_no, date(pr.inspected_on), formatPeso(l.quantity_accepted * Number(l.unit_cost))]
+                    : [l.quantity_accepted, l.unit, formatPeso(l.unit_cost), formatPeso(l.quantity_accepted * Number(l.unit_cost)), l.item.name, l.item.stock_no, ""],
+            )}
+            signatures={
+                par
+                    ? [
+                          ["Received by (end user)", pr.user.name, issuedAt],
+                          ["Issued by (Supply Officer)", "", issuedAt],
+                      ]
+                    : [
+                          ["Received from (Supply Officer)", "", issuedAt],
+                          ["Received by (end user)", pr.user.name, issuedAt],
+                      ]
+            }
+        />
+    );
+}
+
+export const IcsSlip = () => <PropertySlip kind="ics" />;
+export const ParSlip = () => <PropertySlip kind="par" />;
