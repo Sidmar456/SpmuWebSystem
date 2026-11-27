@@ -1,6 +1,6 @@
 # Project Plan
 
-e-Supply ZPPSU: Electronic Supply Requisition, PR Tracking, and Asset Turnover System, for the ZPPSU Supply and Property Management Unit. (Earlier working name: SPMU IMS.)
+E-Supply ZPPSU: Electronic Supply Requisition, PR Tracking, and Asset Turnover System, for the ZPPSU Supply and Property Management Unit. (Earlier working name: SPMU IMS.)
 
 ## 1. Goal
 

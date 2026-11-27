@@ -1,4 +1,4 @@
-# e-Supply ZPPSU
+# E-Supply ZPPSU
 
 Electronic Supply Requisition, PR Tracking, and Asset Turnover System: the web system of the Supply and Property Management Unit (Supply Office) of Zamboanga Peninsula Polytechnic State University (ZPPSU).
 

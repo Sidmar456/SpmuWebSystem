@@ -18,7 +18,7 @@ function Slip({ title, number, backTo, fields, note, columns, rows, signatures }
     // The tab title becomes the default PDF file name when saving the print.
     useEffect(() => {
         const previous = document.title;
-        document.title = `${number} · e-Supply ZPPSU`;
+        document.title = `${number} · E-Supply ZPPSU`;
         return () => {
             document.title = previous;
         };
