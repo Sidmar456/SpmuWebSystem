@@ -86,7 +86,9 @@ class InspectionsTest extends TestCase
         $this->actingAs($this->user)->postJson('/api/inspections', ['item_request_line_id' => $lineId, 'problem' => 'Again'])
             ->assertJsonValidationErrors('item_request_line_id');
 
+        $this->actingAs($this->admin)->getJson('/api/inspections?status=open')->assertJsonCount(1, 'data');
         $this->actingAs($this->user)->postJson("/api/inspections/$id/cancel")->assertOk()->assertJsonPath('inspection.status', 'cancelled');
+        $this->actingAs($this->admin)->getJson('/api/inspections?status=open')->assertJsonCount(0, 'data');
         $this->requestInspection($lineId);
     }
 

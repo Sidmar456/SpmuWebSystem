@@ -1,13 +1,12 @@
 import { Plus } from '@phosphor-icons/react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Alert, buttonClass, Card, EmptyState, formatDateTime, Pagination, Spinner, StatusBadge } from '../../components/ui';
+import { Alert, buttonClass, Card, EmptyState, formatDate, formatDateTime, Pagination, Spinner, StatusBadge } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { useApi } from '../../lib/useApi';
 import { INSPECTION_STATUS, OUTCOMES } from './labels';
 
-const STATUSES = [['', 'All'], ...Object.entries(INSPECTION_STATUS)];
+const STATUSES = [['', 'All'], ['open', 'Open'], ...Object.entries(INSPECTION_STATUS)];
 
-const formatDate = (value) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString('en-PH', { dateStyle: 'medium' }) : '');
 
 export default function InspectionList() {
     const { isAdmin } = useAuth();

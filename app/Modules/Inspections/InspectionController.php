@@ -19,12 +19,14 @@ class InspectionController
 {
     public function index(Request $request): JsonResponse
     {
-        $request->validate(['status' => ['nullable', Rule::enum(InspectionStatus::class)]]);
+        // `open` = requested or scheduled: still needs a date or the report.
+        $request->validate(['status' => ['nullable', Rule::in(['open', ...array_column(InspectionStatus::cases(), 'value')])]]);
 
         $inspections = Inspection::query()
             ->with(['user:id,name,office', 'line.item:id,stock_no,name,unit', 'line.request:id,request_no'])
             ->when(! $this->isAdmin($request->user()), fn ($q) => $q->where('user_id', $request->user()->id))
-            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
+            ->when($request->status === 'open', fn ($q) => $q->whereIn('status', [InspectionStatus::Requested, InspectionStatus::Scheduled]))
+            ->when($request->status && $request->status !== 'open', fn ($q) => $q->where('status', $request->status))
             ->latest('id')
             ->paginate(25);
 

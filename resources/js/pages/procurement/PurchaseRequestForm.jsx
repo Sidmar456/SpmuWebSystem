@@ -143,7 +143,7 @@ export default function PurchaseRequestForm() {
                                             error={errors[`lines.${i}.description`] ?? errors[`lines.${i}.inquiry_line_id`]}
                                         />
                                     </div>
-                                    <Input label="Unit" name={`lines.${i}.unit`} required maxLength={30} readOnly={!freeLines} value={line.unit} onChange={setLine(i, 'unit')} error={errors[`lines.${i}.unit`]} />
+                                    <Input label="Unit" name={`lines.${i}.unit`} required maxLength={30} readOnly={!freeLines} hint={freeLines ? undefined : 'From the inquiry'} value={line.unit} onChange={setLine(i, 'unit')} error={errors[`lines.${i}.unit`]} />
                                     <Input
                                         label="Quantity"
                                         name={`lines.${i}.quantity`}
@@ -157,7 +157,8 @@ export default function PurchaseRequestForm() {
                                         error={errors[`lines.${i}.quantity`]}
                                     />
                                     <Input
-                                        label="Est. unit cost (₱)"
+                                        label="Est. unit cost"
+                                        prefix="₱"
                                         name={`lines.${i}.unit_cost`}
                                         type="number"
                                         inputMode="decimal"

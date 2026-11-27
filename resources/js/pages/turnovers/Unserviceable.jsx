@@ -52,7 +52,7 @@ function Register({ page, onPage }) {
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState('');
 
-    // shortcut: selection is per page (25 items); add cross-page selection if one IIRUP ever needs more.
+    // Register stays mounted while the page changes, so ticks on other pages are kept.
     const toggle = (id) => setSelected((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
 
     async function create() {
@@ -78,6 +78,14 @@ function Register({ page, onPage }) {
             }
         >
             <p className="mb-3 text-sm text-slate-600">Tick the items to consolidate. An item needs its ARE no. first; set it on the turnover.</p>
+            {selected.length > 0 && (
+                <p role="status" className="mb-3 text-sm font-medium text-slate-900">
+                    {selected.length} selected. Ticks on other pages are kept.{' '}
+                    <button type="button" className="cursor-pointer text-brand underline underline-offset-2" onClick={() => setSelected([])}>
+                        Clear
+                    </button>
+                </p>
+            )}
             <Alert>{message || error}</Alert>
             {loading && !data ? (
                 <Spinner />

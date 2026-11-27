@@ -278,6 +278,10 @@ class PurchaseRequestsTest extends TestCase
         $this->step($this->admin, $id, 'twg_verified');
         $this->step($this->admin, $id, 'series_assigned', ['series_no' => '1']);
         $this->assertSame(0, $counts()['prs_to_act'], 'BAC holds it now');
+        $this->actingAs($this->admin)->getJson('/api/purchase-requests?waiting=1')->assertJsonCount(0, 'data');
+        $this->actingAs($bac)->getJson('/api/purchase-requests?waiting=1')
+            ->assertJsonCount(1, 'data')->assertJsonPath('data.0.next_step', 'bac_validated');
+        $this->actingAs($this->user)->getJson('/api/purchase-requests?waiting=1')->assertJsonCount(0, 'data');
         $this->step($bac, $id, 'bac_validated');
         $this->step($bac, $id, 'bid_awarded', ['awarded_to' => 'ABC', 'award_amount' => 1]);
         $this->assertSame(1, $counts()['prs_to_act'], 'back to the Supply Office');

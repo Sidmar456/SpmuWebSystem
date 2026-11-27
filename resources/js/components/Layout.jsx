@@ -5,20 +5,21 @@ import { useAuth } from '../lib/auth';
 import { useApi } from '../lib/useApi';
 import { Button, buttonClass } from './ui';
 
-// Add a line here when a module's screens are built (BACKLOG M7). `admin: true` hides it from personnel.
+// Add a line here when a module's screens are built. `admin: true` hides it from personnel; `group` is the menu heading.
 const NAV = [
     { to: '/dashboard', label: 'Dashboard', icon: SquaresFour, admin: true },
-    { to: '/stocks', label: 'Stocks', icon: Package },
-    { to: '/suppliers', label: 'Suppliers', icon: Truck, admin: true },
-    { to: '/requests', label: 'Requests', icon: ClipboardText },
-    { to: '/inquiries', label: 'Availability', icon: ListMagnifyingGlass },
-    { to: '/purchase-requests', label: 'Purchase requests', icon: ShoppingCart },
-    { to: '/turnovers', label: 'Turnovers', icon: ArrowUUpLeft },
-    { to: '/inspections', label: 'Inspections', icon: MagnifyingGlass },
-    { to: '/unserviceable', label: 'Unserviceable', icon: Archive, admin: true },
-    { to: '/history', label: 'History', icon: ClockCounterClockwise },
-    { to: '/accounts', label: 'Accounts', icon: UsersThree, admin: true },
+    { to: '/stocks', label: 'Stocks', icon: Package, group: 'Supplies' },
+    { to: '/requests', label: 'Requests', icon: ClipboardText, group: 'Supplies' },
+    { to: '/inquiries', label: 'Availability', icon: ListMagnifyingGlass, group: 'Supplies' },
+    { to: '/purchase-requests', label: 'Purchase requests', icon: ShoppingCart, group: 'Supplies' },
+    { to: '/turnovers', label: 'Turnovers', icon: ArrowUUpLeft, group: 'Property' },
+    { to: '/inspections', label: 'Inspections', icon: MagnifyingGlass, group: 'Property' },
+    { to: '/unserviceable', label: 'Unserviceable', icon: Archive, admin: true, group: 'Property' },
+    { to: '/suppliers', label: 'Suppliers', icon: Truck, admin: true, group: 'Office' },
+    { to: '/history', label: 'History', icon: ClockCounterClockwise, group: 'Office' },
+    { to: '/accounts', label: 'Accounts', icon: UsersThree, admin: true, group: 'Office' },
 ];
+const GROUPS = [undefined, 'Supplies', 'Property', 'Office'];
 
 export default function Layout() {
     const { user, isAdmin, logout } = useAuth();
@@ -81,8 +82,14 @@ export default function Layout() {
                         Menu
                     </Button>
                 </div>
-                <nav id="main-nav" aria-label="Main" className={`${menuOpen ? 'block' : 'hidden'} space-y-1 px-2 pb-4 md:block`}>
-                    {links.map(({ to, label, icon: Icon }) => (
+                <nav id="main-nav" aria-label="Main" className={`${menuOpen ? 'block' : 'hidden'} px-2 pb-4 md:block md:overflow-y-auto`}>
+                    {GROUPS.map((group) => {
+                        const items = links.filter((link) => link.group === group);
+                        if (items.length === 0) return null;
+                        return (
+                            <div key={group ?? 'top'} role="group" aria-label={group} className="space-y-1">
+                                {group && <p className="px-3 pt-4 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">{group}</p>}
+                    {items.map(({ to, label, icon: Icon }) => (
                         <NavLink
                             key={to}
                             to={to}
@@ -101,6 +108,9 @@ export default function Layout() {
                             )}
                         </NavLink>
                     ))}
+                            </div>
+                        );
+                    })}
                 </nav>
             </aside>
 

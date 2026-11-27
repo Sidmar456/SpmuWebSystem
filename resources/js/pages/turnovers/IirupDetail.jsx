@@ -1,13 +1,11 @@
 import { CalendarBlank, Printer, Trash } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDateTime, Input, Modal, Select, Spinner, StatusBadge, Textarea } from '../../components/ui';
+import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDate, formatDateTime, Input, Modal, Select, Spinner, StatusBadge, Textarea, today } from '../../components/ui';
 import { useAction } from '../../lib/useAction';
 import { useApi } from '../../lib/useApi';
 import { DISPOSAL_METHODS, IIRUP_STATUS } from './labels';
 
-const formatDate = (value) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString('en-PH', { dateStyle: 'long' }) : '');
-const today = () => new Date().toLocaleDateString('en-CA'); // local YYYY-MM-DD
 
 export default function IirupDetail() {
     const { id } = useParams();

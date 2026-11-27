@@ -1,7 +1,7 @@
 import { ArrowUUpLeft, CalendarBlank, ClipboardText, Printer, ShoppingCart, XCircle } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDateTime, Input, Modal, ProgressSteps, Select, Spinner, StatusBadge, Textarea } from '../../components/ui';
+import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDate, formatDateTime, Input, Modal, ProgressSteps, Select, Spinner, StatusBadge, Textarea, today } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { useAction } from '../../lib/useAction';
 import { useApi } from '../../lib/useApi';
@@ -9,8 +9,6 @@ import { TURNOVER_STATUS } from '../turnovers/labels';
 import { INSPECTION_STATUS, OUTCOMES } from './labels';
 import { propertySteps } from './steps';
 
-const formatDate = (value) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString('en-PH', { dateStyle: 'long' }) : '');
-const today = () => new Date().toLocaleDateString('en-CA'); // local YYYY-MM-DD
 
 export default function InspectionDetail() {
     const { id } = useParams();

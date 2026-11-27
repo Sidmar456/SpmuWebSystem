@@ -45,6 +45,12 @@ class PurchaseRequest extends Model
             ->orWhereIn('status', [PurchaseRequestStatus::Ordered, PurchaseRequestStatus::Delivered, PurchaseRequestStatus::Inspected]));
     }
 
+    /** PRs at a BAC step (exactly 2 or 3 steps recorded, since steps go in order). */
+    public static function waitingForBac(): Builder
+    {
+        return static::query()->where('status', PurchaseRequestStatus::Submitted)->has('steps', '>=', 2)->has('steps', '<=', 3);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

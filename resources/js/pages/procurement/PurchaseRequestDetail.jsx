@@ -1,14 +1,12 @@
 import { ArrowBendUpLeft, CheckCircle, ClipboardText, HandArrowUp, PencilSimple, Printer, Truck } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDateTime, formatPeso, Input, Modal, ProgressSteps, Select, Spinner, StatusBadge, Textarea } from '../../components/ui';
+import { Alert, BackLink, Button, buttonClass, Card, Detail, formatDate, formatDateTime, formatPeso, Input, Modal, ProgressSteps, Select, Spinner, StatusBadge, Textarea, today } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { useAction } from '../../lib/useAction';
 import { useApi } from '../../lib/useApi';
 import { PR_STATUS, PR_STEPS } from './labels';
 
-const formatDate = (value) => (value ? new Date(`${value}T00:00:00`).toLocaleDateString('en-PH', { dateStyle: 'medium' }) : '');
-const today = () => new Date().toLocaleDateString('en-CA'); // local YYYY-MM-DD
 
 /** The detail a step recorded (series no., award, PO no.), for the stepper. */
 function stepDetail(record) {
@@ -235,6 +233,7 @@ export default function PurchaseRequestDetail() {
                 open={dialog !== null}
                 title={{ record: `Record: ${next?.[1]}`, return: `Return ${pr.pr_no}`, correct: `Correct ${pr.pr_no}`, delivery: `Delivery for ${pr.pr_no}`, iar: `Inspection and acceptance of ${pr.pr_no}`, issue: `Stock in and issue ${pr.pr_no}` }[dialog] ?? ''}
                 onClose={() => setDialog(null)}
+                wide={['correct', 'iar', 'issue'].includes(dialog)}
             >
                 {dialog === 'record' && <RecordStepForm pr={pr} step={next} onDone={done} />}
                 {dialog === 'return' && <ReturnForm pr={pr} step={next} onDone={done} />}
@@ -267,7 +266,7 @@ function RecordStepForm({ pr, step, onDone }) {
                     label={fieldLabel}
                     name={name}
                     type={type}
-                    {...(type === 'number' ? { inputMode: 'decimal', min: '0', step: '0.01' } : { maxLength: name === 'awarded_to' ? 255 : 50 })}
+                    {...(type === 'number' ? { inputMode: 'decimal', min: '0', step: '0.01', prefix: '₱' } : { maxLength: name === 'awarded_to' ? 255 : 50 })}
                     required
                     value={form[name]}
                     onChange={set(name)}
@@ -276,6 +275,7 @@ function RecordStepForm({ pr, step, onDone }) {
             ))}
             <Input label="Date done" name="done_on" type="date" max={today()} required value={form.done_on} onChange={set('done_on')} error={errors.done_on} />
             <Textarea label="Remarks (optional)" name="remarks" maxLength={255} rows={2} value={form.remarks} onChange={set('remarks')} error={errors.remarks} />
+            <p className="text-sm text-slate-600">A recorded step cannot be edited. Check the date and details before saving.</p>
             <div className="flex justify-end">
                 <Button type="submit" disabled={busy || !form.done_on || fields.some(([name]) => !String(form[name]).trim())}>
                     {busy ? 'Saving…' : 'Save'}
@@ -345,7 +345,7 @@ function CorrectForm({ pr, onDone }) {
                         <Textarea label={`Item ${i + 1} description and specifications`} name={`lines.${i}.description`} required maxLength={500} rows={2} value={l.description} onChange={setLine(i, 'description')} error={errors[`lines.${i}.description`]} />
                         <div className="grid grid-cols-2 gap-3">
                             <Input label={`Quantity (${l.unit})`} name={`lines.${i}.quantity`} type="number" inputMode="numeric" min="1" step="1" required value={l.quantity} onChange={setLine(i, 'quantity')} error={errors[`lines.${i}.quantity`]} />
-                            <Input label="Est. unit cost (₱)" name={`lines.${i}.unit_cost`} type="number" inputMode="decimal" min="0" step="0.01" required value={l.unit_cost} onChange={setLine(i, 'unit_cost')} error={errors[`lines.${i}.unit_cost`]} />
+                            <Input label="Est. unit cost" prefix="₱" name={`lines.${i}.unit_cost`} type="number" inputMode="decimal" min="0" step="0.01" required value={l.unit_cost} onChange={setLine(i, 'unit_cost')} error={errors[`lines.${i}.unit_cost`]} />
                         </div>
                     </li>
                 ))}
@@ -443,6 +443,7 @@ function IarForm({ pr, onDone }) {
                 onChange={(e) => setRemarks(e.target.value)}
                 error={errors.inspection_remarks}
             />
+            <p className="text-sm text-slate-600">The IAR cannot be changed after saving.</p>
             <div className="flex justify-end">
                 <Button type="submit" disabled={busy || !inspectedOn || (short && !remarks.trim())}>
                     {busy ? 'Saving…' : 'Save IAR'}
@@ -452,24 +453,55 @@ function IarForm({ pr, onDone }) {
     );
 }
 
-/** Pick an existing stock item by name or stock no. */
+/** Pick an existing stock item: type to narrow the list, then choose one. */
 function ItemPicker({ name, value, onChange, error }) {
     const [search, setSearch] = useState('');
+    const [chosen, setChosen] = useState(null);
     const { data } = useApi('/items', search.trim() ? { search } : {});
-    const items = data?.data ?? [];
+    const items = (data?.data ?? []).slice(0, 8);
 
     return (
-        <div className="space-y-2">
-            <Input label="Search stock" name={`${name}-search`} type="search" value={search} onChange={(e) => setSearch(e.target.value)} />
-            <Select label="Stock item" name={name} required value={value} onChange={(e) => onChange(e.target.value)} error={error}>
-                <option value="">Choose an item</option>
+        <fieldset className="space-y-2" aria-describedby={error ? `${name}-error` : undefined}>
+            <legend className="sr-only">Stock item</legend>
+            <Input label="Find a stock item" name={`${name}-search`} type="search" hint="Name or stock no." value={search} onChange={(e) => setSearch(e.target.value)} />
+            {chosen && !items.some((item) => item.id === chosen.id) && (
+                <p className="text-sm text-slate-700">
+                    Chosen: <span className="font-medium">{chosen.name}</span> <span className="font-mono text-xs">({chosen.stock_no})</span>
+                </p>
+            )}
+            <ul className="max-h-56 space-y-1 overflow-y-auto">
                 {items.map((item) => (
-                    <option key={item.id} value={item.id}>
-                        {item.name} ({item.stock_no}) · {item.type}
-                    </option>
+                    <li key={item.id}>
+                        <label
+                            className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 text-sm ring-1 transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-brand ${
+                                String(value) === String(item.id) ? 'bg-blue-50 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
+                            }`}
+                        >
+                            <input
+                                type="radio"
+                                name={name}
+                                checked={String(value) === String(item.id)}
+                                onChange={() => {
+                                    setChosen(item);
+                                    onChange(String(item.id));
+                                }}
+                                className="size-4 accent-brand"
+                            />
+                            <span className="min-w-0">
+                                {item.name} <span className="font-mono text-xs text-slate-500">{item.stock_no}</span>
+                                <span className="block text-xs text-slate-500">{item.type}</span>
+                            </span>
+                        </label>
+                    </li>
                 ))}
-            </Select>
-        </div>
+                {data && items.length === 0 && <li className="text-sm text-slate-600">No stock item matches. Use New stock item instead.</li>}
+            </ul>
+            {error && (
+                <p id={`${name}-error`} className="text-sm text-red-700">
+                    {error}
+                </p>
+            )}
+        </fieldset>
     );
 }
 
@@ -551,6 +583,7 @@ function IssueForm({ pr, threshold, onDone }) {
                 })}
             </ol>
             <Input label="Received by" name="received_by" required maxLength={255} hint="The person who takes the items at the counter." value={receivedBy} onChange={(e) => setReceivedBy(e.target.value)} error={errors.received_by} />
+            <p className="text-sm text-slate-600">This stocks in and issues every item at once, and cannot be undone.</p>
             <div className="flex justify-end">
                 <Button type="submit" disabled={busy || !receivedBy.trim()}>
                     {busy ? 'Issuing…' : 'Stock in and issue'}
