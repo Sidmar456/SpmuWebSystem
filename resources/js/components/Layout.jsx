@@ -1,9 +1,9 @@
-import { Archive, ArrowUUpLeft, Bell, CaretDown, Truck, UsersThree, ClipboardText, ClockCounterClockwise, List, ListMagnifyingGlass, MagnifyingGlass, Package, ShoppingCart, SignOut, SquaresFour } from '@phosphor-icons/react';
-import { useEffect, useRef, useState } from 'react';
+import { Archive, Armchair, ArrowUUpLeft, Basket, Bell, Buildings, CaretLeft, Truck, UsersThree, ClipboardText, ClockCounterClockwise, List, ListMagnifyingGlass, MagnifyingGlass, Package, ShoppingCart, SignOut, SquaresFour } from '@phosphor-icons/react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { useApi } from '../lib/useApi';
-import { Button, buttonClass } from './ui';
+import { Button, buttonClass, Spinner } from './ui';
 
 // Add a line here when a module's screens are built. `admin: true` hides it from personnel; `group` is the menu heading.
 const NAV = [
@@ -19,7 +19,12 @@ const NAV = [
     { to: '/history', label: 'History', icon: ClockCounterClockwise, group: 'Office' },
     { to: '/accounts', label: 'Accounts', icon: UsersThree, admin: true, group: 'Office' },
 ];
-const GROUPS = [undefined, 'Supplies', 'Property', 'Office'];
+// [group, icon]: groups open like dropdowns. `undefined` is the top row (Dashboard).
+const GROUPS = [[undefined], ['Supplies', Basket], ['Property', Armchair], ['Office', Buildings]];
+const COLLAPSED_KEY = 'spmu.menu.collapsed';
+// One menu row: full width, a line under each row, a left bar marks the current screen.
+const ROW =
+    'flex min-h-12 w-full cursor-pointer items-center gap-3 border-b border-l-4 border-b-slate-600/80 px-4 text-left text-[15px] transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white';
 
 export default function Layout() {
     const { user, isAdmin, logout } = useAuth();
@@ -57,6 +62,21 @@ export default function Layout() {
     useEffect(() => {
         if (activeGroup) setOpenGroups((groups) => (groups.has(activeGroup) ? groups : new Set(groups).add(activeGroup)));
     }, [activeGroup]);
+    // Desktop only: the ☰ button shrinks the menu to an icon strip. Remembered per browser (a convenience, so it may reset).
+    const [collapsed, setCollapsed] = useState(() => {
+        try {
+            return localStorage.getItem(COLLAPSED_KEY) === '1';
+        } catch {
+            return false;
+        }
+    });
+    useEffect(() => {
+        try {
+            localStorage.setItem(COLLAPSED_KEY, collapsed ? '1' : '0');
+        } catch {
+            // Private window or blocked storage: the menu simply opens expanded next time.
+        }
+    }, [collapsed]);
     const toggleGroup = (group) =>
         setOpenGroups((groups) => {
             const next = new Set(groups);
@@ -78,15 +98,17 @@ export default function Layout() {
                 Skip to main content
             </a>
 
-            <aside className="bg-slate-900 text-slate-100 md:sticky md:top-0 md:h-dvh md:w-60 md:shrink-0">
-                <div className="flex items-center justify-between px-4 py-4">
-                    <div>
+            <aside
+                className={`flex flex-col bg-slate-700 text-slate-100 md:sticky md:top-0 md:h-dvh md:shrink-0 md:transition-[width] md:duration-150 motion-reduce:transition-none ${collapsed ? 'md:w-16' : 'md:w-64'}`}
+            >
+                <div className={`flex items-center justify-between gap-2 border-b border-slate-600 px-4 py-3 ${collapsed ? 'md:justify-center md:px-2' : ''}`}>
+                    <div className={collapsed ? 'md:hidden' : ''}>
                         <p className="text-sm font-semibold">SPMU IMS</p>
                         <p className="text-xs text-slate-300">ZPPSU Supply Office</p>
                     </div>
                     <Button
                         variant="ghost"
-                        className="text-slate-100 hover:bg-slate-800 md:hidden"
+                        className="text-slate-100 hover:bg-slate-600 md:hidden"
                         aria-expanded={menuOpen}
                         aria-controls="main-nav"
                         onClick={() => setMenuOpen((open) => !open)}
@@ -94,47 +116,75 @@ export default function Layout() {
                         <List size={20} aria-hidden="true" />
                         Menu
                     </Button>
+                    <button
+                        type="button"
+                        aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}
+                        aria-expanded={!collapsed}
+                        aria-controls="main-nav"
+                        title={collapsed ? 'Expand menu' : 'Collapse menu'}
+                        onClick={() => setCollapsed((c) => !c)}
+                        className="hidden size-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-slate-800 text-slate-200 ring-1 ring-slate-600 transition-colors duration-150 hover:bg-slate-600 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:inline-flex"
+                    >
+                        <List size={22} aria-hidden="true" />
+                    </button>
                 </div>
-                <nav id="main-nav" aria-label="Main" className={`${menuOpen ? 'block' : 'hidden'} px-2 pb-4 md:block md:overflow-y-auto`}>
-                    {GROUPS.map((group) => {
+                <nav id="main-nav" aria-label="Main" className={`${menuOpen ? 'block' : 'hidden'} pb-4 md:block md:flex-1 md:overflow-y-auto`}>
+                    {GROUPS.map(([group, GroupIcon]) => {
                         const items = links.filter((link) => link.group === group);
                         if (items.length === 0) return null;
                         const open = !group || openGroups.has(group);
                         const listId = `nav-${group ?? 'top'}`;
+                        // In the icon strip a group shows only its icon; clicking it expands the menu with that group open.
+                        const onGroupClick = () => {
+                            if (collapsed && window.matchMedia('(min-width: 768px)').matches) {
+                                setCollapsed(false);
+                                setOpenGroups((groups) => new Set(groups).add(group));
+                            } else {
+                                toggleGroup(group);
+                            }
+                        };
                         return (
-                            <div key={group ?? 'top'} className={group ? 'mt-2' : ''}>
+                            <div key={group ?? 'top'}>
                                 {group && (
                                     <button
                                         type="button"
                                         aria-expanded={open}
                                         aria-controls={listId}
-                                        onClick={() => toggleGroup(group)}
-                                        className="flex min-h-11 w-full cursor-pointer items-center justify-between rounded-md px-3 text-xs font-semibold tracking-wide text-slate-400 uppercase transition-colors duration-150 hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:min-h-9"
+                                        title={collapsed ? group : undefined}
+                                        onClick={onGroupClick}
+                                        className={`${ROW} border-l-transparent text-slate-200 hover:bg-slate-600 hover:text-white ${collapsed ? 'md:justify-center md:px-0' : ''}`}
                                     >
-                                        {group}
-                                        <CaretDown size={14} weight="bold" aria-hidden="true" className={`transition-transform duration-150 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`} />
+                                        <GroupIcon size={20} aria-hidden="true" className="shrink-0" />
+                                        <span className={collapsed ? 'md:sr-only' : ''}>{group}</span>
+                                        <CaretLeft
+                                            size={14}
+                                            weight="bold"
+                                            aria-hidden="true"
+                                            className={`ml-auto shrink-0 text-slate-400 transition-transform duration-150 motion-reduce:transition-none ${open ? '-rotate-90' : ''} ${collapsed ? 'md:hidden' : ''}`}
+                                        />
                                     </button>
                                 )}
-                                <div id={listId} role="group" aria-label={group} hidden={!open} className="space-y-1">
-                    {items.map(({ to, label, icon: Icon }) => (
-                        <NavLink
-                            key={to}
-                            to={to}
-                            onClick={() => setMenuOpen(false)}
-                            className={({ isActive }) =>
-                                `flex min-h-11 items-center gap-3 rounded-md px-3 text-sm transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:min-h-10 ${
-                                    isActive ? 'bg-slate-800 font-medium text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                                }`
-                            }
-                        >
-                            {({ isActive }) => (
-                                <>
-                                    <Icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden="true" />
-                                    {label}
-                                </>
-                            )}
-                        </NavLink>
-                    ))}
+                                <div id={listId} role="group" aria-label={group} hidden={!open} className={`${group ? 'bg-slate-800/50' : ''} ${collapsed && group ? 'md:hidden' : ''}`}>
+                                    {items.map(({ to, label, icon: Icon }) => (
+                                        <NavLink
+                                            key={to}
+                                            to={to}
+                                            title={collapsed ? label : undefined}
+                                            onClick={() => setMenuOpen(false)}
+                                            className={({ isActive }) =>
+                                                `${ROW} ${group ? 'pl-9' : ''} ${collapsed ? 'md:justify-center md:px-0' : ''} ${
+                                                    isActive ? 'border-l-brand bg-slate-800 font-medium text-white' : 'border-l-transparent text-slate-200 hover:bg-slate-600 hover:text-white'
+                                                }`
+                                            }
+                                        >
+                                            {({ isActive }) => (
+                                                <>
+                                                    <Icon size={20} weight={isActive ? 'fill' : 'regular'} aria-hidden="true" className="shrink-0" />
+                                                    <span className={collapsed ? 'md:sr-only' : ''}>{label}</span>
+                                                </>
+                                            )}
+                                        </NavLink>
+                                    ))}
                                 </div>
                             </div>
                         );
@@ -166,7 +216,10 @@ export default function Layout() {
                     </Button>
                 </header>
                 <main id="main" ref={mainRef} tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 p-4 outline-none md:p-6">
-                    <Outlet />
+                    {/* Lazy screens load here, so the menu stays on screen while they download. */}
+                    <Suspense fallback={<Spinner />}>
+                        <Outlet />
+                    </Suspense>
                 </main>
             </div>
         </div>
