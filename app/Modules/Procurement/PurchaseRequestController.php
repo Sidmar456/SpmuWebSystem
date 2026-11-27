@@ -179,7 +179,6 @@ class PurchaseRequestController
                 'status' => RequestStatus::Approved,
             ]);
             $threshold = config('spmu.par_threshold');
-            $ics = $par = false;
 
             foreach ($data['lines'] as $row) {
                 $line = $accepted[$row['id']];
@@ -191,19 +190,18 @@ class PurchaseRequestController
                 $risLine = $ris->lines()->create(['item_id' => $item->id, 'quantity_requested' => $line->quantity_accepted, 'quantity_approved' => $line->quantity_accepted]);
                 $this->ledger->move($item, -$line->quantity_accepted, MovementType::Issue, $by, $ris, $ris->request_no);
                 $risLine->forceFill(['quantity_issued' => $line->quantity_accepted])->save();
-                $line->forceFill(['item_id' => $item->id])->save();
-
-                if ($item->type === ItemType::Property) {
-                    (float) $line->unit_cost >= $threshold ? $par = true : $ics = true;
-                }
+                // Decided once, at issue, so a later threshold change never moves a line to the other slip.
+                $slip = $item->type !== ItemType::Property ? null : ((float) $line->unit_cost >= $threshold ? 'par' : 'ics');
+                $line->forceFill(['item_id' => $item->id, 'slip' => $slip])->save();
             }
 
+            $slips = $accepted->pluck('slip');
             $ris->forceFill(['decided_by' => $by->id, 'decided_at' => now(), 'status' => RequestStatus::Issued, 'issued_by' => $by->id, 'issued_at' => now(), 'received_by' => $data['received_by']])->save();
             $purchaseRequest->forceFill([
                 'status' => PurchaseRequestStatus::Issued,
                 'item_request_id' => $ris->id,
-                'ics_no' => $ics ? Sequence::number('ICS') : null,
-                'par_no' => $par ? Sequence::number('PAR') : null,
+                'ics_no' => $slips->contains('ics') ? Sequence::number('ICS') : null,
+                'par_no' => $slips->contains('par') ? Sequence::number('PAR') : null,
             ])->save();
         });
 

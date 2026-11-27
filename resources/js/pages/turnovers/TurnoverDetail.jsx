@@ -214,12 +214,13 @@ function ReceiveForm({ turnover, onDone }) {
                     label="Condition found"
                     name="condition"
                     required
-                    hint={CONDITIONS[condition][1]}
+                    hint={turnover.inspection_id ? 'Set by the pre-inspection report.' : CONDITIONS[condition][1]}
                     value={condition}
                     onChange={(e) => setCondition(e.target.value)}
                     error={errors.condition}
                 >
-                    {Object.entries(CONDITIONS).map(([value, [label]]) => (
+                    {/* A linked pre-inspection condemned the item, so serviceable is not offered. */}
+                    {Object.entries(CONDITIONS).filter(([value]) => !turnover.inspection_id || value === 'unserviceable').map(([value, [label]]) => (
                         <option key={value} value={value}>
                             {label}
                         </option>

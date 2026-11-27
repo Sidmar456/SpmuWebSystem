@@ -250,6 +250,11 @@ class PurchaseRequestsTest extends TestCase
         $pr->refresh();
         $this->assertMatchesRegularExpression('/^ICS-\d{4}-\d{4}$/', $pr->ics_no);
         $this->assertMatchesRegularExpression('/^PAR-\d{4}-\d{4}$/', $pr->par_no);
+        $this->assertSame(['ics', 'par'], $pr->lines()->orderBy('id')->pluck('slip')->all());
+
+        // A later threshold change does not move lines between the printed slips.
+        config(['spmu.par_threshold' => 1]);
+        $this->actingAs($this->admin)->getJson("/api/purchase-requests/$id")->assertJsonPath('purchase_request.lines.0.slip', 'ics');
         $this->assertSame(0, $existing->fresh()->quantity, 'stocked in and issued out');
         $this->assertSame(2, $existing->movements()->count());
         $this->assertSame('issued', $pr->itemRequest->status->value);

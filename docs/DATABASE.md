@@ -198,6 +198,7 @@ The stock card. One row per change to `items.quantity`.
 | unit_cost | decimal(12,2) | estimated; decides ICS or PAR |
 | quantity_accepted | unsigned int null | set by the IAR |
 | item_id | FK null | the stock item it became at issue |
+| slip | string(3) null | `ics` or `par`, fixed at issue; null for consumables |
 
 ### purchase_request_steps — Procurement
 

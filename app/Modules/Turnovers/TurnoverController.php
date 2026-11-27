@@ -146,6 +146,11 @@ class TurnoverController
             'remarks' => ['nullable', 'string', 'max:255'],
         ]);
 
+        // A pre-inspection already condemned this item; it must not go back to stock.
+        if ($turnover->inspection_id && ($data['condition'] ?? null) === ItemCondition::Serviceable->value) {
+            throw ValidationException::withMessages(['condition' => 'The pre-inspection found this item unserviceable, so it cannot be received as serviceable.']);
+        }
+
         DB::transaction(function () use ($request, $turnover, $data) {
             $line = ItemRequestLine::with('item')->lockForUpdate()->findOrFail($turnover->item_request_line_id);
             $condition = isset($data['condition']) ? ItemCondition::from($data['condition']) : $turnover->condition;

@@ -101,7 +101,7 @@ A person turns over a specific property item that was issued to them. Statuses: 
 | GET | `/api/turnovers?status=&condition=&unconsolidated=` | login | Admin: all. User: own. `status=received&condition=unserviceable&unconsolidated=1` is the unserviceable register |
 | POST | `/api/turnovers` | login | `item_request_line_id`, `quantity`, `reason`, `condition`, `remarks`, `inspection_id`. `unserviceable` requires `inspection_id` (an unserviceable report for the same item and person); a linked turnover must be `unserviceable` |
 | GET | `/api/turnovers/{id}` | owner or admin | Details |
-| POST | `/api/turnovers/{id}/receive` | admin | Item is back. Admin may correct `condition` |
+| POST | `/api/turnovers/{id}/receive` | admin | Item is back. Admin may correct `condition`, except to `serviceable` when the turnover is linked to an unserviceable pre-inspection |
 | POST | `/api/turnovers/{id}/reject` | admin | `remarks` required |
 | POST | `/api/turnovers/{id}/are` | admin | `are_no`: the ARE a received unserviceable item is indexed to. Locked once the item is in an IIRUP |
 | GET | `/api/clearance/{user}` | that person or admin | Property still under the person's name. Empty `holdings` = cleared |
@@ -166,7 +166,7 @@ Office steps (`PrStep`), recorded in order, each with `done_on` and optional `re
 | POST | `/api/purchase-requests/{id}/iar` | admin | `inspected_on`, `lines[{id, quantity_accepted}]`, `inspection_remarks` (required if any line is short). Creates `IAR-YYYY-NNNN` |
 | POST | `/api/purchase-requests/{id}/issue` | admin | `received_by`, `lines[{id, item_id}` or `new_item{stock_no, name, type}]` for every accepted line. Stocks in, issues on a new RIS, sets `ICS-`/`PAR-` numbers |
 
-Property lines with a PR unit cost below `config('spmu.par_threshold')` (`SPMU_PAR_THRESHOLD`, default 50,000) go on the ICS; at or above it, on the PAR.
+Property lines with a PR unit cost below `config('spmu.par_threshold')` (`SPMU_PAR_THRESHOLD`, default 50,000) go on the ICS; at or above it, on the PAR. The choice is stored per line (`slip`) at issue, so changing the threshold later never changes a printed ICS or PAR.
 
 ## History
 
