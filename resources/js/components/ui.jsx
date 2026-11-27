@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, WarningCircle, X } from '@phosphor-icons/react';
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 /* Small set of shared building blocks. Keep styling here so screens stay consistent. */
@@ -33,7 +33,7 @@ export function BackLink({ to, children }) {
 }
 
 // 16px text on phones so iOS does not zoom into the field on focus.
-const inputClass = `block w-full ${controlHeight} rounded-md border-0 bg-white px-3 py-2 text-base text-slate-900 ring-1 ring-slate-300 placeholder:text-slate-500 focus:ring-2 focus:ring-brand aria-invalid:ring-2 aria-invalid:ring-red-600 sm:text-sm`;
+const inputClass = `block w-full ${controlHeight} rounded-md border-0 bg-white px-3 py-2 text-base text-slate-900 ring-1 ring-slate-300 placeholder:text-slate-500 read-only:bg-slate-50 read-only:text-slate-600 focus:ring-2 focus:ring-brand aria-invalid:ring-2 aria-invalid:ring-red-600 sm:text-sm`;
 
 /** Label + control + error message, wired for screen readers. */
 export function Field({ label, error, hint, required = false, children }) {
@@ -66,10 +66,22 @@ export function Field({ label, error, hint, required = false, children }) {
     );
 }
 
-export function Input({ label, error, hint, required, ...props }) {
+/** `prefix` (e.g. "₱") shows inside the field, before the value. */
+export function Input({ label, error, hint, required, prefix, ...props }) {
     return (
         <Field label={label} error={error} hint={hint} required={required}>
-            {(a11y) => <input className={inputClass} {...a11y} {...props} />}
+            {(a11y) =>
+                prefix ? (
+                    <div className="relative">
+                        <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-500">
+                            {prefix}
+                        </span>
+                        <input className={`${inputClass} pl-7`} {...a11y} {...props} />
+                    </div>
+                ) : (
+                    <input className={inputClass} {...a11y} {...props} />
+                )
+            }
         </Field>
     );
 }
@@ -96,7 +108,7 @@ export function Textarea({ label, error, hint, required, ...props }) {
 
 export function Card({ title, actions, children, className = '' }) {
     return (
-        <section className={`rounded-lg bg-white shadow-sm ring-1 ring-slate-200 ${className}`}>
+        <section className={`glass rounded-xl ${className}`}>
             {(title || actions) && (
                 <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
                     <h2 className="text-base font-semibold text-slate-900">{title}</h2>
@@ -193,7 +205,8 @@ export function MovementBadge({ type }) {
 
 export function Spinner({ label = 'Loading…' }) {
     return (
-        <div role="status" className="flex items-center gap-2 p-6 text-sm text-slate-500">
+        // min-h keeps roughly a list's height, so content does not jump when it arrives.
+        <div role="status" className="flex min-h-32 items-center gap-2 p-6 text-sm text-slate-500">
             <span className="size-4 animate-spin rounded-full border-2 border-slate-300 border-t-brand motion-reduce:animate-none" aria-hidden="true" />
             {label}
         </div>
@@ -225,7 +238,8 @@ export function Pagination({ meta, onPage }) {
 }
 
 /** Native <dialog>: focus trap, Escape to close and backdrop come from the browser. */
-export function Modal({ open, title, onClose, children }) {
+/** `wide` for forms that repeat a block per item (IAR, issue, corrections). */
+export function Modal({ open, title, onClose, children, wide = false }) {
     const ref = useRef(null);
     const titleId = useId();
     useEffect(() => {
@@ -242,7 +256,7 @@ export function Modal({ open, title, onClose, children }) {
             ref={ref}
             onClose={onClose}
             aria-labelledby={titleId}
-            className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-lg p-0 shadow-xl backdrop:bg-slate-900/40"
+            className={`m-auto w-[calc(100%-2rem)] ${wide ? 'max-w-3xl' : 'max-w-lg'} glass rounded-xl p-0 shadow-xl backdrop:bg-maroon-900/40 backdrop:backdrop-blur-sm`}
         >
             <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
                 <h2 id={titleId} className="text-base font-semibold">
@@ -301,6 +315,13 @@ export function useErrorFocus(errors) {
     return ref;
 }
 
+/** Date only, e.g. "26 Nov 2026". A plain YYYY-MM-DD is read as a local date, not UTC midnight. */
+export const formatDate = (value) =>
+    value ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00` : value).toLocaleDateString('en-PH', { dateStyle: 'medium' }) : '';
+
+/** Today as local YYYY-MM-DD, for date inputs. */
+export const today = () => new Date().toLocaleDateString('en-CA');
+
 export const formatDateTime = (value) =>
     value ? new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
@@ -310,11 +331,31 @@ const stepState = {
     upcoming: ['bg-white text-slate-500 ring-slate-300', 'not started'],
 };
 
-/** Where a multi-step process stands. `steps`: [{ label, detail, done }]. State is in text too, not colour alone. */
+/**
+ * Where a multi-step process stands. `steps`: [{ label, detail, done }]. State is in text too, not colour alone.
+ * On small screens only a summary shows until "Show all steps" is pressed; wide screens always show the row.
+ */
 export function ProgressSteps({ label, steps }) {
     const current = steps.findIndex((s) => !s.done);
+    const [open, setOpen] = useState(false);
+    const listId = useId();
     return (
-        <ol aria-label={label} className="grid gap-3 lg:flex lg:gap-0">
+        <div>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 lg:hidden">
+                <p className="text-sm text-slate-700">
+                    {current === -1 ? (
+                        `All ${steps.length} steps done`
+                    ) : (
+                        <>
+                            Step {current + 1} of {steps.length}: <span className="font-medium text-slate-900">{steps[current].label}</span>
+                        </>
+                    )}
+                </p>
+                <Button variant="ghost" aria-expanded={open} aria-controls={listId} onClick={() => setOpen(!open)}>
+                    {open ? 'Hide steps' : 'Show all steps'}
+                </Button>
+            </div>
+        <ol id={listId} aria-label={label} className={`${open ? 'grid' : 'hidden'} gap-3 lg:flex lg:gap-0`}>
             {steps.map((s, i) => {
                 const state = s.done ? 'done' : i === current ? 'current' : 'upcoming';
                 const [circle, text] = stepState[state];
@@ -337,6 +378,7 @@ export function ProgressSteps({ label, steps }) {
                 );
             })}
         </ol>
+        </div>
     );
 }
 

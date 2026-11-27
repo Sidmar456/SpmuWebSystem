@@ -1,5 +1,5 @@
 @echo off
-rem S8.2 Daily backup of SPMU IMS: database dump, item photos and .env.
+rem S8.2 Daily backup of E-Supply ZPPSU: database dump, item photos and .env.
 rem Run once a day from Windows Task Scheduler. See docs/DEPLOYMENT.md section 9.
 rem The MariaDB login is read from %CNF% (an option file), never typed on the command line.
 setlocal

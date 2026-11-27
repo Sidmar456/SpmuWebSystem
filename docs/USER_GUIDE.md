@@ -1,4 +1,4 @@
-# User Guide — SPMU Inventory Monitoring System (S8.4)
+# User Guide — E-Supply ZPPSU (S8.4)
 
 For ZPPSU personnel who request supplies, and for Supply Office staff who run the stockroom. Open the system in a browser on the campus network at the address the Supply Office gives you (for example `http://spmu.zppsu.local`). It works on phones too.
 
@@ -118,7 +118,7 @@ When the whole order arrives: **Record delivery** (DR or invoice no.). After ins
 
 After the IAR: **Stock in and issue**. For each accepted item pick an existing stock item or create a new one (stock no., name, property or consumable), and enter who receives them. This makes an RIS; property also gets an ICS (below ₱50,000) or a PAR (₱50,000 and up). Print each for signatures.
 
-**BAC validators** open **Purchase requests**, then **Record: BAC validated** or **Return for corrections**, and later **Record: Bid awarded** with the supplier and amount.
+**BAC validators** start on **Purchase requests → Waiting for me** (the PRs at a BAC step), then **Record: BAC validated** or **Return for corrections**, and later **Record: Bid awarded** with the supplier and amount.
 
 ### Turnovers
 

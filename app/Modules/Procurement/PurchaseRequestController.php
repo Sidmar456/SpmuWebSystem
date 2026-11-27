@@ -30,12 +30,20 @@ class PurchaseRequestController
     {
         $prs = PurchaseRequest::query()
             ->with('user:id,name,office')
-            ->withCount('lines')
+            ->withCount(['lines', 'steps'])
             ->withSum('lines as total', DB::raw('quantity * unit_cost'))
             ->when(! $this->seesAll($request->user()), fn ($q) => $q->where('user_id', $request->user()->id))
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
+            // "Waiting for me": the Supply Office's or the BAC's turn, by the viewer's role.
+            ->when($request->boolean('waiting'), fn ($q) => $q->whereIn('id', match (true) {
+                Gate::forUser($request->user())->allows('admin') => PurchaseRequest::waitingForSupply()->select('id'),
+                Gate::forUser($request->user())->allows('validator') => PurchaseRequest::waitingForBac()->select('id'),
+                default => [],
+            }))
             ->latest('id')
-            ->paginate(25);
+            ->paginate(25)
+            // Steps are recorded in order, so the count gives the next one.
+            ->through(fn (PurchaseRequest $pr) => $pr->setAttribute('next_step', $pr->status === PurchaseRequestStatus::Submitted ? PrStep::cases()[$pr->steps_count]->value ?? null : null));
 
         return response()->json($prs);
     }

@@ -196,7 +196,7 @@ function ReceiveForm({ turnover, onDone }) {
                         <label
                             key={value}
                             className={`flex min-h-11 cursor-pointer gap-3 rounded-md p-3 text-sm ring-1 transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-brand ${
-                                decision === value ? 'bg-blue-50 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
+                                decision === value ? 'bg-brand/10 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
                             }`}
                         >
                             <input type="radio" name="decision" value={value} checked={decision === value} onChange={() => setDecision(value)} className="mt-0.5 size-4 accent-brand" />

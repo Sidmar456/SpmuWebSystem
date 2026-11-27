@@ -1,6 +1,6 @@
 import { Plus, Trash } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, BackLink, Button, Card, EmptyState, ErrorSummary, Input, StockBadge } from '../../components/ui';
 import { api, formErrors } from '../../lib/api';
 import { useApi } from '../../lib/useApi';
@@ -94,7 +94,13 @@ export default function RequestForm() {
             <div>
                 <BackLink to="/requests">Requests</BackLink>
                 <h1 className="mt-1 text-xl font-semibold text-slate-900">New request</h1>
-                <p className="text-sm text-slate-600">Requisition and Issue Slip (RIS). Claim the items at the Supply Office once approved.</p>
+                <p className="text-sm text-slate-600">
+                    Requisition and Issue Slip (RIS). Claim the items at the Supply Office once approved. Not in stock, or not enough?{' '}
+                    <Link to="/inquiries/new" className="font-medium text-brand underline underline-offset-2">
+                        Ask for availability
+                    </Link>
+                    .
+                </p>
             </div>
 
             <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>

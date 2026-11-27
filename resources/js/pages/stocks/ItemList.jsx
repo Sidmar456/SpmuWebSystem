@@ -83,7 +83,7 @@ export default function ItemList() {
                             aria-pressed={view === value}
                             onClick={() => setFilters({ view: value === 'grid' ? '' : value, page: filters.page })}
                             className={`inline-flex min-h-11 cursor-pointer items-center gap-1.5 px-3 text-sm font-medium transition-colors duration-150 first:rounded-l-md last:rounded-r-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:min-h-9 ${
-                                view === value ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
+                                view === value ? 'bg-brand text-white' : 'bg-white text-slate-700 hover:bg-slate-50'
                             }`}
                         >
                             <Icon size={18} aria-hidden="true" />
@@ -134,7 +134,7 @@ function ItemGrid({ items, loading }) {
                 const href = `/stocks/${item.id}`;
                 return (
                     <li key={item.id}>
-                        <article className="relative flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200 transition-shadow duration-150 hover:shadow-md">
+                        <article className="glass relative flex h-full flex-col overflow-hidden rounded-xl transition-shadow duration-150 hover:shadow-md">
                             <div className="p-2 pb-0">
                                 <ItemPhoto item={item} size={320} lazy />
                             </div>

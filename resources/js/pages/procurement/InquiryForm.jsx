@@ -1,6 +1,6 @@
 import { Plus, Trash } from '@phosphor-icons/react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Alert, BackLink, Button, Card, ErrorSummary, Input, useErrorFocus } from '../../components/ui';
 import { api, formErrors } from '../../lib/api';
 
@@ -47,7 +47,13 @@ export default function InquiryForm() {
             <div>
                 <BackLink to="/inquiries">Availability inquiries</BackLink>
                 <h1 className="mt-1 text-xl font-semibold text-slate-900">New availability inquiry</h1>
-                <p className="text-sm text-slate-600">List what you need. Items the Supply Office tags as not available can go into a purchase request.</p>
+                <p className="text-sm text-slate-600">
+                    List what you need. Items the Supply Office tags as not available can go into a purchase request. Check{' '}
+                    <Link to="/stocks" className="font-medium text-brand underline underline-offset-2">
+                        Stocks
+                    </Link>{' '}
+                    first: items in stock are requested directly.
+                </p>
             </div>
 
             <form ref={formRef} onSubmit={submit} className="space-y-4" noValidate>

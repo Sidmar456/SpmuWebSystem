@@ -6,7 +6,51 @@
 
 @theme {
     --font-sans: 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
-    /* Brand color. Change these two values to re-color the whole app. */
-    --color-brand: #2563eb;
-    --color-brand-dark: #1d4ed8;
+    /* ZPPSU colors, taken from the seal: maroon for actions, gold for accents. Change these to re-color the app. */
+    --color-brand: #8b1a1a;
+    --color-brand-dark: #6b1215;
+    --color-maroon-900: #3f0a0d;
+    --color-gold: #f2c230;
+}
+
+@layer base {
+    /* Warm page with soft maroon and gold light behind the glass panels. */
+    body {
+        background-color: #faf6f2;
+        background-image:
+            radial-gradient(40rem 40rem at 0% 0%, rgb(139 26 26 / 0.22), transparent 70%),
+            radial-gradient(36rem 36rem at 100% 100%, rgb(242 194 48 / 0.32), transparent 70%),
+            radial-gradient(28rem 28rem at 70% 20%, rgb(139 26 26 / 0.1), transparent 70%);
+        background-attachment: fixed;
+    }
+
+    @media print {
+        body {
+            background: #fff;
+        }
+    }
+}
+
+/* Frosted glass surface: cards, dialogs, panels. */
+@utility glass {
+    background-color: rgb(255 255 255 / 0.68);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.7);
+    box-shadow: 0 8px 32px rgb(63 10 13 / 0.08);
+}
+
+/* Solid panels when the person asks for less transparency, or the browser cannot blur: text stays readable. */
+@media (prefers-reduced-transparency: reduce) {
+    .glass {
+        background-color: #fff;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+        background-color: #fff;
+    }
 }

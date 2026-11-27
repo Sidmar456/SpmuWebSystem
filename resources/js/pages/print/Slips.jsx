@@ -18,7 +18,7 @@ function Slip({ title, number, backTo, fields, note, columns, rows, signatures }
     // The tab title becomes the default PDF file name when saving the print.
     useEffect(() => {
         const previous = document.title;
-        document.title = `${number} · SPMU IMS`;
+        document.title = `${number} · E-Supply ZPPSU`;
         return () => {
             document.title = previous;
         };
@@ -42,6 +42,7 @@ function Slip({ title, number, backTo, fields, note, columns, rows, signatures }
 
             <main className="mx-auto max-w-3xl bg-white p-4 text-sm sm:p-8 text-black shadow print:max-w-none print:p-0 print:shadow-none">
                 <header className="text-center">
+                    <img src="/images/zppsu-logo.png" alt="ZPPSU seal" width="64" height="64" className="mx-auto mb-2 size-16 object-contain" />
                     <p>Republic of the Philippines</p>
                     <p className="font-semibold">
                         Zamboanga Peninsula Polytechnic State University

@@ -27,7 +27,7 @@ class SupplyNotification extends Notification implements ShouldQueue
     {
         $mail = (new MailMessage)->subject($this->title)->line($this->message);
 
-        return $this->link ? $mail->action('Open SPMU IMS', url($this->link)) : $mail;
+        return $this->link ? $mail->action('Open '.config('app.name'), url($this->link)) : $mail;
     }
 
     public function toArray(object $notifiable): array

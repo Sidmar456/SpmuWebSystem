@@ -147,7 +147,7 @@ export default function TurnoverForm() {
                                     <label
                                         key={value}
                                         className={`flex min-h-11 cursor-pointer gap-3 rounded-md p-3 text-sm ring-1 transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-brand ${
-                                            form.condition === value ? 'bg-blue-50 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
+                                            form.condition === value ? 'bg-brand/10 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
                                         }`}
                                     >
                                         <input

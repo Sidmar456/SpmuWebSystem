@@ -1,6 +1,6 @@
-# SPMU IMS
+# E-Supply ZPPSU
 
-Inventory Monitoring System for the Supply and Property Management Unit (Supply Office) of Zamboanga Peninsula Polytechnic State University (ZPPSU).
+Electronic Supply Requisition, PR Tracking, and Asset Turnover System: the web system of the Supply and Property Management Unit (Supply Office) of Zamboanga Peninsula Polytechnic State University (ZPPSU).
 
 It replaces paper request slips, logbooks and spreadsheet counts with one web app:
 

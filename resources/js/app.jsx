@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { lazy, StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -7,18 +7,6 @@ import { AuthProvider, useAuth } from './lib/auth';
 import AccountList from './pages/accounts/AccountList';
 import Login from './pages/auth/Login';
 import { ForgotPassword, ResetPassword } from './pages/auth/PasswordReset';
-import { ClearanceSlip, IirupSlip, InquirySlip, IarSlip, IcsSlip, InspectionSlip, ParSlip, PurchaseRequestSlip, RequestSlip, TurnoverSlip } from './pages/print/Slips';
-import PurchaseRequestDetail from './pages/procurement/PurchaseRequestDetail';
-import PurchaseRequestForm from './pages/procurement/PurchaseRequestForm';
-import PurchaseRequestList from './pages/procurement/PurchaseRequestList';
-import InquiryDetail from './pages/procurement/InquiryDetail';
-import InquiryForm from './pages/procurement/InquiryForm';
-import InquiryList from './pages/procurement/InquiryList';
-import IirupDetail from './pages/turnovers/IirupDetail';
-import Unserviceable from './pages/turnovers/Unserviceable';
-import InspectionDetail from './pages/inspections/InspectionDetail';
-import InspectionForm from './pages/inspections/InspectionForm';
-import InspectionList from './pages/inspections/InspectionList';
 import Dashboard from './pages/dashboard/Dashboard';
 import History from './pages/history/History';
 import Notifications from './pages/notifications/Notifications';
@@ -36,6 +24,23 @@ import TurnoverList from './pages/turnovers/TurnoverList';
 import ItemForm from './pages/stocks/ItemForm';
 import ItemList from './pages/stocks/ItemList';
 
+// Print slips and the inspection and procurement screens load only when opened, to keep the first download small.
+const slip = (name) => lazy(() => import('./pages/print/Slips').then((m) => ({ default: m[name] })));
+const [ClearanceSlip, IirupSlip, InquirySlip, IarSlip, IcsSlip, InspectionSlip, ParSlip, PurchaseRequestSlip, RequestSlip, TurnoverSlip] = [
+    'ClearanceSlip', 'IirupSlip', 'InquirySlip', 'IarSlip', 'IcsSlip', 'InspectionSlip', 'ParSlip', 'PurchaseRequestSlip', 'RequestSlip', 'TurnoverSlip',
+].map(slip);
+const PurchaseRequestDetail = lazy(() => import('./pages/procurement/PurchaseRequestDetail'));
+const PurchaseRequestForm = lazy(() => import('./pages/procurement/PurchaseRequestForm'));
+const PurchaseRequestList = lazy(() => import('./pages/procurement/PurchaseRequestList'));
+const InquiryDetail = lazy(() => import('./pages/procurement/InquiryDetail'));
+const InquiryForm = lazy(() => import('./pages/procurement/InquiryForm'));
+const InquiryList = lazy(() => import('./pages/procurement/InquiryList'));
+const IirupDetail = lazy(() => import('./pages/turnovers/IirupDetail'));
+const Unserviceable = lazy(() => import('./pages/turnovers/Unserviceable'));
+const InspectionDetail = lazy(() => import('./pages/inspections/InspectionDetail'));
+const InspectionForm = lazy(() => import('./pages/inspections/InspectionForm'));
+const InspectionList = lazy(() => import('./pages/inspections/InspectionList'));
+
 /** Logged-in screens. `admin` also requires the admin role. */
 function RequireAuth({ admin = false }) {
     const { user, isAdmin } = useAuth();
@@ -46,10 +51,10 @@ function RequireAuth({ admin = false }) {
     return <Outlet />;
 }
 
-/** Admins start on the dashboard, personnel on the stock list. */
+/** Admins start on the dashboard, BAC validators on PRs waiting for them, personnel on the stock list. */
 function Home() {
-    const { isAdmin } = useAuth();
-    return <Navigate to={isAdmin ? '/dashboard' : '/stocks'} replace />;
+    const { isAdmin, isValidator } = useAuth();
+    return <Navigate to={isAdmin ? '/dashboard' : isValidator ? '/purchase-requests?waiting=1' : '/stocks'} replace />;
 }
 
 /** Login and sign up: send logged-in people home. */
@@ -125,7 +130,9 @@ createRoot(document.getElementById('app')).render(
     <StrictMode>
         <BrowserRouter>
             <AuthProvider>
-                <App />
+                <Suspense fallback={<Spinner />}>
+                    <App />
+                </Suspense>
             </AuthProvider>
         </BrowserRouter>
     </StrictMode>,
