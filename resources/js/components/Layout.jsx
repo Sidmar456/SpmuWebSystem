@@ -139,10 +139,7 @@ export default function Layout() {
                 </button>
                 <Link to="/" className="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                     <img src="/images/zppsu-logo.png" alt="" width="40" height="40" className="size-10 shrink-0 rounded-full bg-white object-contain ring-2 ring-gold/70" />
-                    <span className="min-w-0 leading-tight">
-                        <span className="block truncate font-serif text-lg tracking-wide [font-variant:small-caps]">e-Supply ZPPSU</span>
-                        <span className="hidden truncate text-xs text-white/85 md:block">Electronic Supply Requisition, PR Tracking, and Asset Turnover System</span>
-                    </span>
+                    <span className="truncate font-serif text-lg tracking-wide [font-variant:small-caps]">E-Supply ZPPSU</span>
                 </Link>
 
                 <div className="ml-auto flex items-center gap-1">
