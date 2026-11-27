@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name') }} · ZPPSU Supply Office</title>
-    <link rel="icon" type="image/jpeg" href="/images/zppsu-logo.jpg">
+    <title>{{ config('app.name') }}</title>
+    <link rel="icon" type="image/png" href="/images/zppsu-logo.png">
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
 </head>

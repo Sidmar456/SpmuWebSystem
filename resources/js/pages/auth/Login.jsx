@@ -37,7 +37,7 @@ export default function Login() {
     return (
         <AuthShell
             title="Log in"
-            subtitle="Inventory Monitoring System"
+            subtitle="Electronic Supply Requisition, PR Tracking, and Asset Turnover System"
             footer={
                 <>
                     No account yet?{' '}

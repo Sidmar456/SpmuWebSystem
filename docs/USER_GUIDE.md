@@ -1,4 +1,4 @@
-# User Guide — SPMU Inventory Monitoring System (S8.4)
+# User Guide — e-Supply ZPPSU (S8.4)
 
 For ZPPSU personnel who request supplies, and for Supply Office staff who run the stockroom. Open the system in a browser on the campus network at the address the Supply Office gives you (for example `http://spmu.zppsu.local`). It works on phones too.
 

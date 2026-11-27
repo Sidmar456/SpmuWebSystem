@@ -51,7 +51,7 @@ php artisan key:generate
 Edit `C:\xampp\htdocs\spmu\.env`:
 
 ```
-APP_NAME="SPMU IMS"
+APP_NAME="e-Supply ZPPSU"
 APP_ENV=production
 APP_DEBUG=false
 LOG_STACK=daily        # one file per day, kept 30 days (LOG_DAILY_DAYS)

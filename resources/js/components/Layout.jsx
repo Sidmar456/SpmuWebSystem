@@ -138,10 +138,10 @@ export default function Layout() {
                     <List size={22} aria-hidden="true" />
                 </button>
                 <Link to="/" className="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-                    <img src="/images/zppsu-logo.jpg" alt="" width="40" height="40" className="size-10 shrink-0 rounded-full bg-white object-contain ring-2 ring-gold/70" />
-                    <span className="truncate font-serif text-lg tracking-wide [font-variant:small-caps]">
-                        <span className="hidden lg:inline">Zamboanga Peninsula Polytechnic State University</span>
-                        <span className="lg:hidden">ZPPSU</span>
+                    <img src="/images/zppsu-logo.png" alt="" width="40" height="40" className="size-10 shrink-0 rounded-full bg-white object-contain ring-2 ring-gold/70" />
+                    <span className="min-w-0 leading-tight">
+                        <span className="block truncate font-serif text-lg tracking-wide [font-variant:small-caps]">e-Supply ZPPSU</span>
+                        <span className="hidden truncate text-xs text-white/85 md:block">Electronic Supply Requisition, PR Tracking, and Asset Turnover System</span>
                     </span>
                 </Link>
 
@@ -307,7 +307,7 @@ export default function Layout() {
                                 </span>
                             </>
                         )}
-                        <span className="ml-auto hidden text-xs text-slate-500 sm:inline">SPMU Inventory Monitoring System</span>
+                        <span className="ml-auto hidden text-xs text-slate-500 sm:inline">ZPPSU Supply and Property Management Unit</span>
                     </nav>
                     <main id="main" ref={mainRef} tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 p-4 outline-none md:p-6">
                         {/* Lazy screens load here, so the menu stays on screen while they download. */}

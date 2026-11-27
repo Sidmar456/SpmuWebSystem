@@ -28,7 +28,7 @@ class AccountController
     public function approve(User $user): JsonResponse
     {
         $this->decide($user, AccountStatus::Approved);
-        Notify::user($user, 'Account approved', 'Your SPMU IMS account is approved. You can now log in.', '/login');
+        Notify::user($user, 'Account approved', 'Your e-Supply ZPPSU account is approved. You can now log in.', '/login');
 
         return response()->json(['user' => $user]);
     }
@@ -36,7 +36,7 @@ class AccountController
     public function reject(User $user): JsonResponse
     {
         $this->decide($user, AccountStatus::Rejected);
-        Notify::user($user, 'Account request rejected', 'Your SPMU IMS account request was not approved. Please contact the Supply Office.');
+        Notify::user($user, 'Account request rejected', 'Your e-Supply ZPPSU account request was not approved. Please contact the Supply Office.');
 
         return response()->json(['user' => $user]);
     }
@@ -68,7 +68,7 @@ class AccountController
 
         $user->update(['status' => AccountStatus::Approved]);
         Audit::log('account.enabled', $user, ['email' => $user->email]);
-        Notify::user($user, 'Account enabled', 'Your SPMU IMS account is active again. You can log in.', '/login');
+        Notify::user($user, 'Account enabled', 'Your e-Supply ZPPSU account is active again. You can log in.', '/login');
 
         return response()->json(['user' => $user]);
     }
