@@ -1,4 +1,4 @@
-import { Archive, ArrowUUpLeft, Bell, Truck, UsersThree, ClipboardText, ClockCounterClockwise, List, ListMagnifyingGlass, MagnifyingGlass, Package, ShoppingCart, SignOut, SquaresFour } from '@phosphor-icons/react';
+import { Archive, ArrowUUpLeft, Bell, CaretDown, Truck, UsersThree, ClipboardText, ClockCounterClockwise, List, ListMagnifyingGlass, MagnifyingGlass, Package, ShoppingCart, SignOut, SquaresFour } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
@@ -51,6 +51,19 @@ export default function Layout() {
 
     const links = NAV.filter((link) => !link.admin || isAdmin);
 
+    // Menu groups are dropdowns. The group holding the current screen always opens, so you can see where you are.
+    const activeGroup = NAV.find((link) => location.pathname.startsWith(link.to))?.group;
+    const [openGroups, setOpenGroups] = useState(() => new Set(activeGroup ? [activeGroup] : []));
+    useEffect(() => {
+        if (activeGroup) setOpenGroups((groups) => (groups.has(activeGroup) ? groups : new Set(groups).add(activeGroup)));
+    }, [activeGroup]);
+    const toggleGroup = (group) =>
+        setOpenGroups((groups) => {
+            const next = new Set(groups);
+            next.has(group) ? next.delete(group) : next.add(group);
+            return next;
+        });
+
     async function handleLogout() {
         await logout();
         navigate('/login');
@@ -86,9 +99,23 @@ export default function Layout() {
                     {GROUPS.map((group) => {
                         const items = links.filter((link) => link.group === group);
                         if (items.length === 0) return null;
+                        const open = !group || openGroups.has(group);
+                        const listId = `nav-${group ?? 'top'}`;
                         return (
-                            <div key={group ?? 'top'} role="group" aria-label={group} className="space-y-1">
-                                {group && <p className="px-3 pt-4 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">{group}</p>}
+                            <div key={group ?? 'top'} className={group ? 'mt-2' : ''}>
+                                {group && (
+                                    <button
+                                        type="button"
+                                        aria-expanded={open}
+                                        aria-controls={listId}
+                                        onClick={() => toggleGroup(group)}
+                                        className="flex min-h-11 w-full cursor-pointer items-center justify-between rounded-md px-3 text-xs font-semibold tracking-wide text-slate-400 uppercase transition-colors duration-150 hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:min-h-9"
+                                    >
+                                        {group}
+                                        <CaretDown size={14} weight="bold" aria-hidden="true" className={`transition-transform duration-150 motion-reduce:transition-none ${open ? 'rotate-180' : ''}`} />
+                                    </button>
+                                )}
+                                <div id={listId} role="group" aria-label={group} hidden={!open} className="space-y-1">
                     {items.map(({ to, label, icon: Icon }) => (
                         <NavLink
                             key={to}
@@ -108,6 +135,7 @@ export default function Layout() {
                             )}
                         </NavLink>
                     ))}
+                                </div>
                             </div>
                         );
                     })}
