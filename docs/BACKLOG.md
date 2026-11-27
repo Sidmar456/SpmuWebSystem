@@ -71,10 +71,10 @@ Checked against the code on 25 Nov 2026 (branch `laravel-rewrite`). Update this 
 | S5.5 | Property clearance certificate | Done |
 | S6.5 | Reminders for requests and turnovers waiting over 3 days | Done |
 | S0.6 | Daily log rotation | Done |
-| S8.1 | Production deployment | Ready: run on the server |
-| S8.2 | Daily backups and a restore test | Ready: scripts tested locally |
-| S8.3 | Opening balances and user acceptance test | Ready: run with the office |
-| S8.4 | User guide and training | Guide done; training not held |
+| S8.1 | Production deployment | Ready: run on the server (DEPLOYMENT.md covers E9, E10 and validators) |
+| S8.2 | Daily backups and a restore test | Ready: scripts tested locally; restore test counts the E9 and E10 tables |
+| S8.3 | Opening balances and user acceptance test | Ready: run with the office (UAT.md has U1–U15, A1–A22, B1–B3) |
+| S8.4 | User guide and training | Guide done for every flow; training (3 sessions) not held |
 | S9.1 | Request a pre-inspection of issued equipment | Done |
 | S9.2 | Schedule and record the pre-inspection report | Done |
 | S9.3 | Route the outcome: turn over, or purchase request | Done |
@@ -87,6 +87,8 @@ Checked against the code on 25 Nov 2026 (branch `laravel-rewrite`). Update this 
 | S10.4 | Delivery, inspection request and IAR | Done |
 | S10.5 | Accept delivered items into stock and issue | Done |
 | S10.6 | ICS and PAR slips | Done |
+| S6.6 | Dashboard and reminder for inspections, inquiries and PRs | Done |
+| S0.7 | Design documents cover E9 and E10 | Done |
 
 ---
 
@@ -234,3 +236,9 @@ Source: the office's "Procurement of goods and services" flow (`END USER.docx`, 
 **S10.4 Delivery and IAR** `procurement` `admin` **M** — Done. On a PR with a signed PO: **Record delivery** (full delivery, DR or invoice no., date), then **Record inspection (IAR)** with the accepted quantity per line (a reason is required when anything is not accepted). `IAR-YYYY-NNNN`, printable. Status `ordered` then `delivered` then `inspected`. Replacement deliveries for non-accepted items stay on paper.
 **S10.5 Accept into stock and issue** `procurement` `admin` **S** — Done. **Stock in and issue** on an inspected PR: each accepted line maps to an existing stock item or a new one; stock goes in through the ledger (ref IAR no.) and straight out on a new RIS for the end user, already issued. PR status `issued`. Issued property shows in the person's care, so it can be turned over later.
 **S10.6 ICS and PAR slips** `procurement` `admin` **S** — Done. At issue, property lines below `SPMU_PAR_THRESHOLD` (default 50,000, `config/spmu.php`) get an ICS no., at or above it a PAR no., by the PR unit cost. Printable ICS and PAR.
+
+## Additions after M10
+
+**S6.6 Dashboard and reminder for inspections, inquiries and PRs** `core` `admin` **S** — Done. Three dashboard cards with the age of the oldest: pre-inspections to schedule or report, availability inquiries to answer, and purchase requests waiting for the Supply Office (an office step it records, the delivery, the IAR or the issue; not while the BAC holds it). `spmu:waiting` at 7:00 AM includes the same three queues.
+
+**S0.7 Design documents cover E9 and E10** `core` **S** — Done. ARCHITECTURE (unserviceable and procurement flows, why office steps are recorded), MODULES (Inspections, Procurement, IIRUP endpoints, `PrStep` table, validator role), DATABASE (new tables and columns, ERD, sequence names) and USER_FLOWS (F11 to F14) match the code.

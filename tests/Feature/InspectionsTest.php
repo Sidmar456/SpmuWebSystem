@@ -127,6 +127,10 @@ class InspectionsTest extends TestCase
             ->assertJsonPath('turnover.inspection.inspection_no', Inspection::find($id)->inspection_no);
         $this->actingAs($this->user)->getJson("/api/inspections/$id")
             ->assertJsonPath('inspection.turnovers.0.id', $turnoverId);
+
+        // The counter cannot overrule the report and put a condemned item back in stock.
+        $this->actingAs($this->admin)->postJson("/api/turnovers/$turnoverId/receive", ['condition' => 'serviceable'])->assertJsonValidationErrors('condition');
+        $this->actingAs($this->admin)->postJson("/api/turnovers/$turnoverId/receive")->assertOk()->assertJsonPath('turnover.condition', 'unserviceable');
     }
 
     public function test_only_an_unserviceable_report_for_the_same_item_can_be_linked(): void

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Modules\Inspections\Inspection;
+use App\Modules\Notifications\SupplyNotification;
 use App\Modules\Procurement\Inquiry;
 use App\Modules\Procurement\PurchaseRequest;
 use App\Modules\Requests\ItemRequest;
@@ -249,6 +250,11 @@ class PurchaseRequestsTest extends TestCase
         $pr->refresh();
         $this->assertMatchesRegularExpression('/^ICS-\d{4}-\d{4}$/', $pr->ics_no);
         $this->assertMatchesRegularExpression('/^PAR-\d{4}-\d{4}$/', $pr->par_no);
+        $this->assertSame(['ics', 'par'], $pr->lines()->orderBy('id')->pluck('slip')->all());
+
+        // A later threshold change does not move lines between the printed slips.
+        config(['spmu.par_threshold' => 1]);
+        $this->actingAs($this->admin)->getJson("/api/purchase-requests/$id")->assertJsonPath('purchase_request.lines.0.slip', 'ics');
         $this->assertSame(0, $existing->fresh()->quantity, 'stocked in and issued out');
         $this->assertSame(2, $existing->movements()->count());
         $this->assertSame('issued', $pr->itemRequest->status->value);
@@ -256,5 +262,30 @@ class PurchaseRequestsTest extends TestCase
         // Issued property is now in the end user's care, so it can be turned over later.
         $this->actingAs($this->user)->getJson('/api/turnovers/holdings')->assertJsonCount(2, 'data');
         $this->actingAs($this->admin)->postJson("/api/purchase-requests/$id/issue", ['received_by' => 'Ana', 'lines' => []])->assertJsonValidationErrors('status');
+    }
+
+    public function test_dashboard_and_reminder_count_procurement_and_inspection_queues(): void
+    {
+        $bac = User::factory()->create(['role' => 'validator']);
+        $id = $this->submittedPr(); // also leaves its SAI answered
+        $this->answeredInquiry();
+        $this->actingAs($this->user)->postJson('/api/inquiries', ['purpose' => 'x', 'lines' => [['description' => 'Ink', 'unit' => 'pc', 'quantity' => 1]]]);
+
+        $counts = fn () => $this->actingAs($this->admin)->getJson('/api/dashboard')->json('counts');
+        $this->assertSame(1, $counts()['pending_inquiries']);
+        $this->assertSame(1, $counts()['prs_to_act'], 'TWG step is the Supply Office');
+
+        $this->step($this->admin, $id, 'twg_verified');
+        $this->step($this->admin, $id, 'series_assigned', ['series_no' => '1']);
+        $this->assertSame(0, $counts()['prs_to_act'], 'BAC holds it now');
+        $this->step($bac, $id, 'bac_validated');
+        $this->step($bac, $id, 'bid_awarded', ['awarded_to' => 'ABC', 'award_amount' => 1]);
+        $this->assertSame(1, $counts()['prs_to_act'], 'back to the Supply Office');
+
+        // Four days later, the reminder lists the inquiry and the PR.
+        $this->travel(4)->days();
+        $this->artisan('spmu:waiting')->assertSuccessful();
+        Notification::assertSentTo($this->admin, SupplyNotification::class,
+            fn ($n) => str_contains($n->message, '1 availability inquiries to answer') && str_contains($n->message, '1 purchase requests waiting for the Supply Office'));
     }
 }

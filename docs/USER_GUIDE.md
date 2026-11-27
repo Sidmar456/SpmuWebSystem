@@ -49,6 +49,23 @@ Changed your mind? Open a **Pending** request and click **Cancel request**.
 
 Leaving ZPPSU or moving office? **Turnovers → My clearance** prints your Certificate of Property Clearance, or lists what you still hold.
 
+### Report broken equipment (pre-inspection)
+
+1. **Turnovers**. Next to the item in "Property in your care", click **Request inspection** and describe the problem (what happens, since when, serial number).
+2. The Supply Office sets a date (you are notified) and inspects it. The report says one of:
+   - **Unserviceable**: click **Turn over item** on the report. The turnover form is filled in for you.
+   - **For replacement, requires repair, or recoverable**: click **Prepare purchase request** on the report to ask for the parts.
+3. **Inspections** lists your requests. The progress bar shows each step, up to disposal.
+
+### Ask for items the office does not have
+
+1. **Availability → New inquiry**. Write the purpose and list each item with a unit and quantity. The items do not have to be in the stock list.
+2. The Supply Office tags each item **Available** (request it from **Requests** as usual) or **Not available**.
+3. On the answered inquiry, click **Create purchase request**. Add specifications (without brand names) and an estimated unit cost for each item. **Submit**, then **Print PR** and forward it to the TWG.
+4. **Purchase requests** shows where your PR is: TWG, PR series no., BAC, bid award, budget, accounting, the President, the PO, delivery, inspection, issue.
+5. If it is **Returned for corrections**, read the reason, click **Correct and resubmit**, fix the specifications, quantities or costs, and resubmit. The steps start again.
+6. When the items arrive and pass inspection, the Supply Office issues them to you on an RIS. Property also comes with an ICS or a PAR to sign.
+
 ### Check your history
 
 **History** shows all your requests and turnovers, newest first. Filter by date with **From** and **To**. Click a number to open it.
@@ -134,9 +151,10 @@ Two short hands-on sessions on the real server, after opening balances are enter
 
 | Session | Who | Length | Covers | Done when the trainee can |
 |---|---|---|---|---|
-| 1. Supply Office | All Supply Office staff | 2 hours | Part 2 of this guide, plus [UAT.md](UAT.md) tests A1–A10 as exercises | Approve a sign-up, issue a request and print the RIS, receive a turnover, stock in a delivery, explain a balance from the stock card |
-| 2. Offices | 1 to 2 people per college or office, who then show their colleagues | 1 hour | Part 1 of this guide, plus tests U1–U8 | Sign up, request items, cancel a request, turn over property, reset a password |
+| 1. Supply Office | All Supply Office staff | 3 hours | Part 2 of this guide, plus [UAT.md](UAT.md) tests A1–A22 as exercises | Approve a sign-up, issue a request and print the RIS, receive a turnover, stock in a delivery, explain a balance from the stock card, inspect equipment and make an IIRUP, answer an inquiry, take a PR from TWG to Stock in and issue |
+| 2. Offices | 1 to 2 people per college or office, who then show their colleagues | 1.5 hours | Part 1 of this guide, plus tests U1–U15 | Sign up, request items, cancel a request, turn over property, request an inspection, send an inquiry, create and correct a purchase request, reset a password |
+| 3. BAC | BAC members with the validator role | 30 minutes | The BAC paragraph in Part 2, plus tests B1–B3 | Validate a PR, record a bid award, return a PR with a reason |
 
-Bring: this guide printed, a projector, 2 sample items set up for practice, and a test supplier with your own email address so the stock request email can be seen.
+Bring: this guide printed, a projector, 2 sample items set up for practice (one property), a test supplier with your own email address so the stock request email can be seen, and one practice PR already past step 2 for the BAC session.
 
 After training, the Supply Office keeps one printed copy of this guide at the counter. Questions go to the Supply Office first, then to the developer listed in the sign-off sheet.

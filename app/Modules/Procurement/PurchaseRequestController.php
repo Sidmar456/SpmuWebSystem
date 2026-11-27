@@ -54,6 +54,11 @@ class PurchaseRequestController
     /** Record the next office step. The BAC validator records its own steps; the Supply Office records the rest. */
     public function recordStep(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
     {
+        return DB::transaction(fn () => $this->recordLockedStep($request, $this->lock($purchaseRequest)));
+    }
+
+    private function recordLockedStep(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
+    {
         $step = $this->currentStepFor($request->user(), $purchaseRequest, $request->input('step'));
 
         $data = $request->validate([
@@ -68,6 +73,7 @@ class PurchaseRequestController
             'details' => array_intersect_key($data, $step->rules()) ?: null,
             'recorded_by' => $request->user()->id,
         ]);
+        $purchaseRequest->touch();
 
         $next = $purchaseRequest->nextStep();
         $link = "/purchase-requests/{$purchaseRequest->id}";
@@ -178,7 +184,6 @@ class PurchaseRequestController
                 'status' => RequestStatus::Approved,
             ]);
             $threshold = config('spmu.par_threshold');
-            $ics = $par = false;
 
             foreach ($data['lines'] as $row) {
                 $line = $accepted[$row['id']];
@@ -190,19 +195,18 @@ class PurchaseRequestController
                 $risLine = $ris->lines()->create(['item_id' => $item->id, 'quantity_requested' => $line->quantity_accepted, 'quantity_approved' => $line->quantity_accepted]);
                 $this->ledger->move($item, -$line->quantity_accepted, MovementType::Issue, $by, $ris, $ris->request_no);
                 $risLine->forceFill(['quantity_issued' => $line->quantity_accepted])->save();
-                $line->forceFill(['item_id' => $item->id])->save();
-
-                if ($item->type === ItemType::Property) {
-                    (float) $line->unit_cost >= $threshold ? $par = true : $ics = true;
-                }
+                // Decided once, at issue, so a later threshold change never moves a line to the other slip.
+                $slip = $item->type !== ItemType::Property ? null : ((float) $line->unit_cost >= $threshold ? 'par' : 'ics');
+                $line->forceFill(['item_id' => $item->id, 'slip' => $slip])->save();
             }
 
+            $slips = $accepted->pluck('slip');
             $ris->forceFill(['decided_by' => $by->id, 'decided_at' => now(), 'status' => RequestStatus::Issued, 'issued_by' => $by->id, 'issued_at' => now(), 'received_by' => $data['received_by']])->save();
             $purchaseRequest->forceFill([
                 'status' => PurchaseRequestStatus::Issued,
                 'item_request_id' => $ris->id,
-                'ics_no' => $ics ? Sequence::number('ICS') : null,
-                'par_no' => $par ? Sequence::number('PAR') : null,
+                'ics_no' => $slips->contains('ics') ? Sequence::number('ICS') : null,
+                'par_no' => $slips->contains('par') ? Sequence::number('PAR') : null,
             ])->save();
         });
 
@@ -220,6 +224,11 @@ class PurchaseRequestController
 
     /** TWG (through the Supply Office) or BAC sends the PR back for corrections. */
     public function returnForCorrections(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
+    {
+        return DB::transaction(fn () => $this->returnLocked($request, $this->lock($purchaseRequest)));
+    }
+
+    private function returnLocked(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
     {
         $step = $this->currentStepFor($request->user(), $purchaseRequest, $request->input('step'));
         if (! $step->canReturn()) {
@@ -267,6 +276,15 @@ class PurchaseRequestController
         Notify::admins('Purchase request resubmitted', "{$request->user()->name} corrected {$purchaseRequest->pr_no}.", "/purchase-requests/{$purchaseRequest->id}");
 
         return response()->json(['purchase_request' => $purchaseRequest->fresh('lines')]);
+    }
+
+    /**
+     * Re-read the PR under a row lock. Two people acting on the same step at once then queue up:
+     * the second sees the step already done and gets a 422, not a duplicate-key error.
+     */
+    private function lock(PurchaseRequest $pr): PurchaseRequest
+    {
+        return PurchaseRequest::lockForUpdate()->findOrFail($pr->id);
     }
 
     /** The step being acted on must be the PR's next step, and the user must hold that step's role. */

@@ -4,7 +4,7 @@ One week on the real server (after [DEPLOYMENT.md](DEPLOYMENT.md) passes), with 
 
 | | |
 |---|---|
-| Who | Supply Office staff (admin role), and 2 to 3 offices (personnel role), for example a college, the Registrar and the Library |
+| Who | Supply Office staff (admin role), 2 to 3 offices (personnel role), for example a college, the Registrar and the Library, and 1 BAC member (validator role) |
 | When | Week 1: day 1 opening balances, days 2 to 5 normal work, day 5 sign-off |
 | Where | The production server, not a laptop. Use real accounts, not the demo seed accounts |
 | Printed | One copy of this file per tester, and the count sheet below |
@@ -44,6 +44,12 @@ Mark **P** (pass) or **F** (fail) and write the issue number from section 3 on e
 | U7 | **History** | One timeline with your RIS and PRS, newest first. You see only your own | | |
 | U8 | Log out, **Forgot password?**, follow the email link, set a new password, log in | Email arrives within 2 minutes. The new password works, the old one does not | | |
 | U9 | On a phone, do U3 again | Everything fits the screen; no sideways scrolling | | |
+| U10 | **Turnovers**: on a property item click **Request inspection**, describe the problem | PIR number, status Requested. Trying a second request for the same item is refused | | |
+| U11 | Try to turn over an item as **Unserviceable** without a report | Note "is inspected before it is turned over" with a link; Submit is disabled | | |
+| U12 | After the report says unserviceable, click **Turn over item** on it | Form is filled in (reason, condition, report number). PRS submitted, status For receiving | | |
+| U13 | **Availability → New inquiry** with 2 items | SAI number, status Waiting for answer | | |
+| U14 | After the answer, on the SAI click **Create purchase request**; add specifications and costs; **Print PR** | Only the not-available items are on the form. Totals add up. PR number, status In process | | |
+| U15 | When a PR is returned, **Correct and resubmit** | The reason is shown. After resubmitting, the progress bar starts again at TWG verified | | |
 
 ### Supply Office (admin)
 
@@ -62,6 +68,23 @@ Mark **P** (pass) or **F** (fail) and write the issue number from section 3 on e
 | A10 | **History → Monthly stock report** for the current month; open it in Excel | For 3 items, opening + in − issued + turned over ± adjustments = closing, and closing = on hand | | |
 | A11 | Log in as personnel and open `/accounts` or `/dashboard` | Sent back to Stocks. Personnel never see admin screens | | |
 | A12 | Ask the server admin to run `scripts\restore-test.bat` on last night's backup | Ends with PASS | | |
+| A14 | **Inspections**: set a date on U10's request, then **Record report** as unserviceable; **Print report** | Requester notified twice. Report prints with findings and signature lines | | |
+| A15 | **Receive** U12's turnover; try to set the condition to serviceable | Only Unserviceable is offered. Stock unchanged; the item appears in **Unserviceable → Register** | | |
+| A16 | Set the ARE no. on that turnover; on **Unserviceable** tick 2 items, **Create IIRUP**, **Print IIRUP** | Items without an ARE no. cannot be ticked. After creating, they leave the register. The ARE no. can no longer change | | |
+| A17 | On the IIRUP: **Schedule disposal**, then **Record disposal** | Status Disposal scheduled, then Disposed. The turnover's progress bar shows every step done | | |
+| A18 | **Availability**: answer U13's inquiry, one item not available | Save stays disabled until every item is tagged. Requester notified | | |
+| A19 | On U14's PR: record TWG verified and PR series no.; try to record a BAC step | BAC steps are not offered to the Supply Office. The PR waits for the BAC | | |
+| A20 | After the BAC (B2), record BURS, funds, contract approved, PO signed; **Record delivery**; **Record inspection (IAR)** accepting one less than ordered | A reason is required for the short item. **Print IAR** shows delivered and accepted quantities | | |
+| A21 | **Stock in and issue**: one existing item, one new property item | An RIS is created and issued at once; the stock card shows in and out. **Print ICS** or **Print PAR** depending on the cost. The item shows in the requester's Property in your care | | |
+| A22 | **Dashboard** with open inspections, inquiries and PRs | The 3 new cards match their lists; PRs held by the BAC are not counted | | |
+
+### BAC (validator)
+
+| ID | Steps | Expected | P/F | Notes |
+|---|---|---|---|---|
+| B1 | Log in as the validator; open **Purchase requests** | Every PR is listed, not only your own. No admin menus (Dashboard, Accounts) | | |
+| B2 | On a PR waiting for the BAC: **Record: BAC validated**, then **Record: Bid awarded** with a supplier and amount | Steps 3 and 4 done with your name. The Supply Office is notified it is their turn | | |
+| B3 | On another PR: **Return for corrections** with a reason | Status Returned for corrections; the requester sees the reason (U15) | | |
 
 ## 3. Issue log
 
@@ -81,6 +104,7 @@ Go-live needs every test passed, or failed only on **minor** issues that are lis
 | Supply Office staff | | | |
 | Office tester | | | |
 | Office tester | | | |
+| BAC tester | | | |
 | Developer | | | |
 
 Accepted with these open minor issues: ____________________________________________

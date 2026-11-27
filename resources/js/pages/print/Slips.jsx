@@ -430,10 +430,7 @@ export function IarSlip() {
     );
 }
 
-/**
- * ICS (semi-expendable, below the PAR threshold) or PAR (at or above it): property lines of an issued PR,
- * split by the PR unit cost.
- */
+/** ICS (semi-expendable, below the PAR threshold) or PAR (at or above it): the lines issued on that slip. */
 function PropertySlip({ kind }) {
     const { id } = useParams();
     const { data, error, loading } = useApi(`/purchase-requests/${id}`);
@@ -441,7 +438,7 @@ function PropertySlip({ kind }) {
     if (error) return <Alert>{error}</Alert>;
     const pr = data.purchase_request;
     const par = kind === "par";
-    const lines = pr.lines.filter((l) => l.quantity_accepted > 0 && l.item?.type === "property" && (Number(l.unit_cost) >= data.par_threshold) === par);
+    const lines = pr.lines.filter((l) => l.slip === kind);
     const issuedAt = pr.item_request?.issued_at;
 
     return (

@@ -59,8 +59,10 @@ Stories: S5.1, S5.2, S5.3.
 ## F7. A broken chair is turned over — Turnover
 
 1. Ben turns over 1 office chair and marks it serviceable.
-2. At the office the officer finds a broken leg. They receive it with the condition changed to `unserviceable`.
-3. The chair is recorded as returned by Ben, but it is not added back to stock. It waits for disposal.
+2. At the office the officer finds a broken leg. They **Receive** it with the condition changed to `unserviceable`.
+3. The chair is recorded as returned by Ben, but it is not added back to stock. It goes to the unserviceable register (F11).
+
+Ben could not have marked it unserviceable himself without a pre-inspection report; only the counter may change the condition on receipt.
 
 Stories: S5.3.
 
@@ -72,7 +74,7 @@ Stories: S6.1.
 
 ## F9. Morning check — Dashboard, Stocks
 
-1. The officer opens the dashboard: 2 requests pending, 1 approved and waiting to be issued, 1 turnover pending, and printer ink low (3 left, reorder level 5). `GET /api/dashboard`
+1. The officer opens the dashboard: 2 requests pending, 1 approved and waiting to be issued, 1 turnover to receive, 1 pre-inspection to schedule, 1 availability inquiry to answer, 2 purchase requests waiting for the Supply Office, and printer ink low (3 left, reorder level 5). Anything older than 3 days says "Overdue". `GET /api/dashboard`
 2. They filter the item list by low stock and check which supplier carries printer ink. `GET /api/items?status=low_stock`, `GET /api/suppliers/{id}`
 
 Stories: S6.2, S2.4, S3.2.
@@ -83,3 +85,48 @@ Stories: S6.2, S2.4, S3.2.
 2. The officer opens the bond paper stock card, filtered by date. Each `issue` row shows the RIS number, the admin who issued it, and the balance after. The RIS shows who received the items.
 
 Stories: S2.3, S6.1.
+
+## F11. A projector stops working — Inspections, Turnover
+
+1. Ana's projector from RIS-2026-0012 will not power on. In **Property in your care** she clicks **Request inspection** and writes "No power since Monday, serial PJ-8821". `POST /api/inspections`
+2. It becomes **PIR-2026-0003**, `requested`. The officer sets the inspection for Thursday; Ana is notified. `POST /api/inspections/{id}/schedule`
+3. On Thursday the officer, acting as the inspectorate, finds a burnt power board and records **Unserviceable**. `POST /api/inspections/{id}/report`. Ana gets "Turn the item over to the Supply Office" and the printed pre-inspection report.
+4. On the report Ana clicks **Turn over item**. The form is already filled in (reason damaged, condition unserviceable, linked to PIR-2026-0003). `POST /api/turnovers` with `inspection_id`
+5. She brings it in. The officer **Receives** PRS-2026-0009: Ana is cleared, and the projector enters the unserviceable register. The officer enters ARE no. `ARE-2026-031`. `POST /api/turnovers/{id}/are`
+6. At month end the officer ticks the 6 items in **Unserviceable → Register** and clicks **Create IIRUP**: **IIRUP-2026-0002**, printed for the disposal committee. `POST /api/iirups`
+7. The committee sets the disposal for 15 December (**Schedule disposal**), and after the public auction the officer clicks **Record disposal** (sale, 15 December). `POST /api/iirups/{id}/schedule`, `POST /api/iirups/{id}/dispose`
+8. The progress bar on PIR-2026-0003 and PRS-2026-0009 now shows every step done, up to Disposed.
+
+Had the report said **Requires repair**, Ana would instead click **Prepare purchase request** for the parts (F12, step 2).
+
+Stories: S9.1–S9.6.
+
+## F12. Ana needs a microscope — Procurement
+
+1. Ana opens **Availability → New inquiry**: 10 reams of bond paper and 2 binocular microscopes for the Biology lab. `POST /api/inquiries`. It becomes **SAI-2026-0007**.
+2. The officer answers: bond paper **Available**, microscopes **Not available** ("none in stock"). `POST /api/inquiries/{id}/answer`. Ana requests the paper from Stocks as usual (F3).
+3. On the SAI Ana clicks **Create purchase request**. The microscopes are filled in; she adds "binocular, 1000x, LED, any brand" and ₱12,000 each. It becomes **PR-2026-0004**. `POST /api/purchase-requests`
+4. She prints the PR and forwards it to the TWG. When it comes back verified, the officer records **TWG verified**, then **PR series no. assigned** (2026-11-045) when Procurement returns it. `POST /api/purchase-requests/{id}/steps`
+
+Stories: S10.1, S10.2, S10.3.
+
+## F13. The BAC validates and awards — Procurement
+
+1. Carla, a BAC member with the `validator` role, gets "PR-2026-0004 is ready for your step". She opens **Purchase requests**; she sees every PR.
+2. The specifications are fine, so she records **BAC validated**. Had they named a brand, she would **Return for corrections** with the reason, Ana would correct the PR (`PUT /api/purchase-requests/{id}`), and the steps would start again from the TWG.
+3. After the bidding she records **Bid awarded**: Mindanao Lab Supply, ₱22,800. The Supply Office is notified that it is its turn again.
+4. The officer records BURS certified, funds certified, contract approved and **PO signed** (PO-2026-0101) as the papers come back. The PR is now `ordered`, and Ana is notified.
+
+Stories: S10.3, S1.7.
+
+## F14. The microscopes arrive — Procurement, Stocks, Request item
+
+1. Mindanao Lab Supply delivers both microscopes. The officer clicks **Record delivery** with DR-5512. `POST /api/purchase-requests/{id}/delivery`
+2. On inspection one microscope has a cracked lens. The officer records the IAR: 1 accepted, reason "cracked objective lens, for replacement". It becomes **IAR-2026-0004**. `POST /api/purchase-requests/{id}/iar`
+3. The officer clicks **Stock in and issue**, creates the new stock item `EQ-0042` Microscope (property), and enters Ana as the receiver. `POST /api/purchase-requests/{id}/issue`
+4. The microscope goes into stock and out on **RIS-2026-0031** in one step; the stock card shows both movements. At ₱12,000 it is below the PAR threshold, so it gets **ICS-2026-0005**.
+5. Ana signs the RIS and the ICS. The microscope now shows in her **Property in your care**, so she can request an inspection or turn it over later.
+
+The replacement for the cracked microscope is followed up on paper.
+
+Stories: S10.4, S10.5, S10.6.
