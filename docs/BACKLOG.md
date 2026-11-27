@@ -88,6 +88,7 @@ Checked against the code on 25 Nov 2026 (branch `laravel-rewrite`). Update this 
 | S10.5 | Accept delivered items into stock and issue | Done |
 | S10.6 | ICS and PAR slips | Done |
 | S6.6 | Dashboard and reminder for inspections, inquiries and PRs | Done |
+| S0.7 | Design documents cover E9 and E10 | Done |
 
 ---
 
@@ -239,3 +240,5 @@ Source: the office's "Procurement of goods and services" flow (`END USER.docx`, 
 ## Additions after M10
 
 **S6.6 Dashboard and reminder for inspections, inquiries and PRs** `core` `admin` **S** — Done. Three dashboard cards with the age of the oldest: pre-inspections to schedule or report, availability inquiries to answer, and purchase requests waiting for the Supply Office (an office step it records, the delivery, the IAR or the issue; not while the BAC holds it). `spmu:waiting` at 7:00 AM includes the same three queues.
+
+**S0.7 Design documents cover E9 and E10** `core` **S** — Done. ARCHITECTURE (unserviceable and procurement flows, why office steps are recorded), MODULES (Inspections, Procurement, IIRUP endpoints, `PrStep` table, validator role), DATABASE (new tables and columns, ERD, sequence names) and USER_FLOWS (F11 to F14) match the code.
