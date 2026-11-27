@@ -9,7 +9,7 @@ It replaces paper request slips, logbooks and spreadsheet counts with one web ap
 
 Built with Laravel 12 (PHP), React 19 and MariaDB/MySQL.
 
-> **Status:** every module and screen is built and tested (56 automated tests). What is left is done on site: deployment, backups, the one-week user acceptance test and training (stories S8.1–S8.4 in [docs/BACKLOG.md](docs/BACKLOG.md)). The old PHP app is kept in `legacy/` for reference only.
+> **Status:** every module and screen is built and tested (57 automated tests). What is left is done on site: deployment, backups, the one-week user acceptance test and training (stories S8.1–S8.4 in [docs/BACKLOG.md](docs/BACKLOG.md)). The old PHP app is kept in `legacy/` for reference only.
 
 ## Contents
 
@@ -176,7 +176,7 @@ This follows the office's "Procurement of goods and services" process.
 - **History**: one timeline of requests and turnovers. Personnel see their own; admins see everyone's.
 - **History → Monthly stock report**: a CSV per item with opening balance, stock in, issued, turned over, adjustments and closing balance, computed from the stock movements.
 - **Notifications** (bell): every decision, return and reminder, with a link to the record.
-- **Dashboard** (admins): counts of pending requests, items to issue, turnovers to receive and pending sign-ups, with the age of the oldest of each.
+- **Dashboard** (admins): counts of pending requests, items to issue, turnovers to receive, pending sign-ups, pre-inspections to schedule or report, availability inquiries to answer, and purchase requests waiting for the Supply Office, with the age of the oldest of each.
 - **Audit log**: account approvals, role changes and supplier changes are recorded with who did them.
 
 ## 5. Documents and numbers
@@ -218,7 +218,7 @@ The scheduler (`php artisan schedule:work`, or a scheduled task on the server) r
 | Command | When | What |
 |---|---|---|
 | `spmu:low-stock` | Daily 7:00 AM | Emails admins the items at or below their reorder level; skipped when there are none |
-| `spmu:waiting` | Daily 7:00 AM | Reminds admins of pending requests, approved requests not yet issued, and turnovers waiting to be received for more than 3 days |
+| `spmu:waiting` | Daily 7:00 AM | Reminds admins of anything waiting more than 3 days: pending requests, approved requests not yet issued, turnovers to receive, pre-inspections, availability inquiries, and purchase requests waiting for the Supply Office |
 
 Other commands:
 
@@ -439,5 +439,4 @@ Opening balances and the one-week acceptance test are in [docs/UAT.md](docs/UAT.
 - Stock items have no unit cost, so property issued through an ordinary request (not a PR) gets an RIS only.
 - Recorded PR steps, deliveries and IARs cannot be edited. Only steps 1 and 3 can send a PR back.
 - Replacement deliveries for items not accepted at the IAR stay on paper, and so does payment.
-- Pending availability inquiries and pre-inspections are not on the dashboard or in the 7:00 AM reminder; admins get the bell notification.
 - Selecting items for an IIRUP works one page (25 items) at a time.

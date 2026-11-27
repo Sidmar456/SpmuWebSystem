@@ -87,6 +87,7 @@ Checked against the code on 25 Nov 2026 (branch `laravel-rewrite`). Update this 
 | S10.4 | Delivery, inspection request and IAR | Done |
 | S10.5 | Accept delivered items into stock and issue | Done |
 | S10.6 | ICS and PAR slips | Done |
+| S6.6 | Dashboard and reminder for inspections, inquiries and PRs | Done |
 
 ---
 
@@ -234,3 +235,7 @@ Source: the office's "Procurement of goods and services" flow (`END USER.docx`, 
 **S10.4 Delivery and IAR** `procurement` `admin` **M** — Done. On a PR with a signed PO: **Record delivery** (full delivery, DR or invoice no., date), then **Record inspection (IAR)** with the accepted quantity per line (a reason is required when anything is not accepted). `IAR-YYYY-NNNN`, printable. Status `ordered` then `delivered` then `inspected`. Replacement deliveries for non-accepted items stay on paper.
 **S10.5 Accept into stock and issue** `procurement` `admin` **S** — Done. **Stock in and issue** on an inspected PR: each accepted line maps to an existing stock item or a new one; stock goes in through the ledger (ref IAR no.) and straight out on a new RIS for the end user, already issued. PR status `issued`. Issued property shows in the person's care, so it can be turned over later.
 **S10.6 ICS and PAR slips** `procurement` `admin` **S** — Done. At issue, property lines below `SPMU_PAR_THRESHOLD` (default 50,000, `config/spmu.php`) get an ICS no., at or above it a PAR no., by the PR unit cost. Printable ICS and PAR.
+
+## Additions after M10
+
+**S6.6 Dashboard and reminder for inspections, inquiries and PRs** `core` `admin` **S** — Done. Three dashboard cards with the age of the oldest: pre-inspections to schedule or report, availability inquiries to answer, and purchase requests waiting for the Supply Office (an office step it records, the delivery, the IAR or the issue; not while the BAC holds it). `spmu:waiting` at 7:00 AM includes the same three queues.

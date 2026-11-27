@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Inspections\Inspection;
 use App\Modules\Requests\ItemRequest;
 use App\Support\Sequence;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,6 +32,17 @@ class PurchaseRequest extends Model
             $pr->pr_no = Sequence::number('PR');
             $pr->status = PurchaseRequestStatus::Submitted;
         });
+    }
+
+    /**
+     * PRs the Supply Office must act on: an office step it records, the delivery, the IAR or the issue.
+     * Steps are recorded strictly in order, so 2 or 3 recorded steps means the BAC holds the PR.
+     */
+    public static function waitingForSupply(): Builder
+    {
+        return static::query()->where(fn ($q) => $q
+            ->where(fn ($q) => $q->where('status', PurchaseRequestStatus::Submitted)->where(fn ($q) => $q->has('steps', '<', 2)->orHas('steps', '>', 3)))
+            ->orWhereIn('status', [PurchaseRequestStatus::Ordered, PurchaseRequestStatus::Delivered, PurchaseRequestStatus::Inspected]));
     }
 
     public function user(): BelongsTo

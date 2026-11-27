@@ -10,6 +10,9 @@ const CARDS = [
     ['low_stock', 'Low stock items', '/stocks?status=low_stock'],
     ['out_of_stock', 'Out of stock items', '/stocks?status=out_of_stock'],
     ['pending_accounts', 'Accounts waiting for approval', '/accounts?status=pending'],
+    ['open_inspections', 'Pre-inspections to schedule or report', '/inspections'],
+    ['pending_inquiries', 'Availability inquiries to answer', '/inquiries?status=pending'],
+    ['prs_to_act', 'Purchase requests waiting for you', '/purchase-requests'],
 ];
 
 // Same limit as `php artisan spmu:waiting`, which reminds admins at 7:00 AM.

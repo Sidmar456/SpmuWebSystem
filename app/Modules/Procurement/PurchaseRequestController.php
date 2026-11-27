@@ -68,6 +68,7 @@ class PurchaseRequestController
             'details' => array_intersect_key($data, $step->rules()) ?: null,
             'recorded_by' => $request->user()->id,
         ]);
+        $purchaseRequest->touch();
 
         $next = $purchaseRequest->nextStep();
         $link = "/purchase-requests/{$purchaseRequest->id}";

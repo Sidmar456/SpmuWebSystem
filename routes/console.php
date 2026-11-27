@@ -3,7 +3,11 @@
 use App\Models\User;
 use App\Modules\Accounts\AccountStatus;
 use App\Modules\Accounts\Role;
+use App\Modules\Dashboard\DashboardController;
 use App\Modules\Notifications\Notify;
+use App\Modules\Procurement\Inquiry;
+use App\Modules\Procurement\InquiryStatus;
+use App\Modules\Procurement\PurchaseRequest;
 use App\Modules\Requests\ItemRequest;
 use App\Modules\Requests\RequestStatus;
 use App\Modules\Stocks\Item;
@@ -66,6 +70,9 @@ Artisan::command('spmu:waiting {--days=3}', function () {
         'requests to review' => ItemRequest::where('status', RequestStatus::Pending)->where('created_at', '<', $before)->count(),
         'approved requests not yet issued' => ItemRequest::where('status', RequestStatus::Approved)->where('decided_at', '<', $before)->count(),
         'turnovers to receive' => Turnover::where('status', TurnoverStatus::Pending)->where('created_at', '<', $before)->count(),
+        'pre-inspections to schedule or report' => DashboardController::openInspections()->where('updated_at', '<', $before)->count(),
+        'availability inquiries to answer' => Inquiry::where('status', InquiryStatus::Pending)->where('created_at', '<', $before)->count(),
+        'purchase requests waiting for the Supply Office' => PurchaseRequest::waitingForSupply()->where('updated_at', '<', $before)->count(),
     ];
     $waiting = array_filter($counts);
 
@@ -79,6 +86,6 @@ Artisan::command('spmu:waiting {--days=3}', function () {
     Notify::admins('Waiting more than '.$this->option('days').' days', "Please act on: {$list}.", '/dashboard');
 
     $this->info("Reminded admins: {$list}.");
-})->purpose('Remind admins about requests and turnovers that are waiting too long');
+})->purpose('Remind admins about requests, turnovers, inspections, inquiries and purchase requests waiting too long');
 
 Schedule::command('spmu:waiting')->dailyAt('07:00');

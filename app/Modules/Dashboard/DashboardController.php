@@ -4,6 +4,11 @@ namespace App\Modules\Dashboard;
 
 use App\Models\User;
 use App\Modules\Accounts\AccountStatus;
+use App\Modules\Inspections\Inspection;
+use App\Modules\Inspections\InspectionStatus;
+use App\Modules\Procurement\Inquiry;
+use App\Modules\Procurement\InquiryStatus;
+use App\Modules\Procurement\PurchaseRequest;
 use App\Modules\Requests\ItemRequest;
 use App\Modules\Requests\RequestStatus;
 use App\Modules\Stocks\Item;
@@ -25,6 +30,9 @@ class DashboardController
                 'to_issue' => ItemRequest::where('status', RequestStatus::Approved)->count(),
                 'pending_turnovers' => Turnover::where('status', TurnoverStatus::Pending)->count(),
                 'pending_accounts' => User::where('status', AccountStatus::Pending)->count(),
+                'open_inspections' => self::openInspections()->count(),
+                'pending_inquiries' => Inquiry::where('status', InquiryStatus::Pending)->count(),
+                'prs_to_act' => PurchaseRequest::waitingForSupply()->count(),
             ],
             // When the oldest item in each queue started waiting, so the dashboard can show its age.
             'oldest' => [
@@ -32,10 +40,19 @@ class DashboardController
                 'to_issue' => ItemRequest::where('status', RequestStatus::Approved)->min('decided_at'),
                 'pending_turnovers' => Turnover::where('status', TurnoverStatus::Pending)->min('created_at'),
                 'pending_accounts' => User::where('status', AccountStatus::Pending)->min('created_at'),
+                'open_inspections' => self::openInspections()->min('updated_at'),
+                'pending_inquiries' => Inquiry::where('status', InquiryStatus::Pending)->min('created_at'),
+                'prs_to_act' => PurchaseRequest::waitingForSupply()->min('updated_at'),
             ],
             'low_stock_items' => Item::lowStock()->orderBy('quantity')->limit(10)
                 ->get(['id', 'stock_no', 'name', 'unit', 'quantity', 'reorder_level']),
             'recent_movements' => StockMovement::with(['item:id,name,unit', 'user:id,name'])->latest('id')->limit(10)->get(),
         ]);
+    }
+
+    /** Requested (needs a date) or scheduled (needs the report). */
+    public static function openInspections()
+    {
+        return Inspection::whereIn('status', [InspectionStatus::Requested, InspectionStatus::Scheduled]);
     }
 }
