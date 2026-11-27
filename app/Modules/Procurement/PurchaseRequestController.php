@@ -54,6 +54,11 @@ class PurchaseRequestController
     /** Record the next office step. The BAC validator records its own steps; the Supply Office records the rest. */
     public function recordStep(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
     {
+        return DB::transaction(fn () => $this->recordLockedStep($request, $this->lock($purchaseRequest)));
+    }
+
+    private function recordLockedStep(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
+    {
         $step = $this->currentStepFor($request->user(), $purchaseRequest, $request->input('step'));
 
         $data = $request->validate([
@@ -220,6 +225,11 @@ class PurchaseRequestController
     /** TWG (through the Supply Office) or BAC sends the PR back for corrections. */
     public function returnForCorrections(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
     {
+        return DB::transaction(fn () => $this->returnLocked($request, $this->lock($purchaseRequest)));
+    }
+
+    private function returnLocked(Request $request, PurchaseRequest $purchaseRequest): JsonResponse
+    {
         $step = $this->currentStepFor($request->user(), $purchaseRequest, $request->input('step'));
         if (! $step->canReturn()) {
             throw ValidationException::withMessages(['step' => 'This step cannot return the PR.']);
@@ -266,6 +276,15 @@ class PurchaseRequestController
         Notify::admins('Purchase request resubmitted', "{$request->user()->name} corrected {$purchaseRequest->pr_no}.", "/purchase-requests/{$purchaseRequest->id}");
 
         return response()->json(['purchase_request' => $purchaseRequest->fresh('lines')]);
+    }
+
+    /**
+     * Re-read the PR under a row lock. Two people acting on the same step at once then queue up:
+     * the second sees the step already done and gets a 422, not a duplicate-key error.
+     */
+    private function lock(PurchaseRequest $pr): PurchaseRequest
+    {
+        return PurchaseRequest::lockForUpdate()->findOrFail($pr->id);
     }
 
     /** The step being acted on must be the PR's next step, and the user must hold that step's role. */
