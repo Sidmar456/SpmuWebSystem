@@ -76,6 +76,8 @@ MAIL_USERNAME=<account>
 MAIL_PASSWORD=<app password>
 MAIL_FROM_ADDRESS=<supply office address>
 MAIL_FROM_NAME="ZPPSU Supply Office"
+
+SPMU_PAR_THRESHOLD=50000      # unit cost (PHP) from which property is issued on a PAR instead of an ICS
 ```
 
 Never commit `.env`. It is already in `.gitignore`.
@@ -92,6 +94,8 @@ php artisan view:cache
 ```
 
 Do **not** run `php artisan db:seed` on the server. The seeder makes demo accounts with known passwords.
+
+After the first admin logs in: each BAC member signs up, the admin approves them in **Accounts**, then clicks **Make validator**. Without at least one validator, purchase requests stop at step 3 (BAC validated).
 
 ## 5. Build the React app
 
@@ -142,7 +146,7 @@ Create two Windows Task Scheduler tasks. For each one, set it to run **whether t
 | SPMU scheduler | `C:\xampp\php\php.exe` | `artisan schedule:run` |
 | SPMU queue | `C:\xampp\php\php.exe` | `artisan queue:work --stop-when-empty --tries=3` |
 
-At 7:00 AM the scheduler runs `spmu:low-stock` (items at or below reorder level) and `spmu:waiting` (requests and turnovers waiting more than 3 days). Each sends admins one notification, and nothing when there is nothing to report. The queue sends every email: notifications, supplier stock requests. Password reset emails are sent at once, without the queue, so `MAIL_*` in `.env` must work.
+At 7:00 AM the scheduler runs `spmu:low-stock` (items at or below reorder level) and `spmu:waiting` (requests, turnovers, pre-inspections, availability inquiries and purchase requests waiting on the Supply Office for more than 3 days). Each sends admins one notification, and nothing when there is nothing to report. The queue sends every email: notifications, supplier stock requests. Password reset emails are sent at once, without the queue, so `MAIL_*` in `.env` must work.
 
 ## 8. Network
 
@@ -190,6 +194,9 @@ First run `php artisan spmu:check` on the server. It checks what can be read fro
 | Admin can log in | Dashboard loads |
 | Request flow | Submit, approve, issue: stock goes down, and a movement appears on the stock card |
 | Turnover flow | Turn over a property item, receive it: stock goes up |
+| Inspection flow | Request a pre-inspection, schedule and report it as unserviceable, turn the item over from the report, receive it: it appears in **Unserviceable → Register** |
+| Purchase request flow | Send an inquiry, tag an item not available, create a PR, record the 8 steps (log in as a validator for steps 3 and 4), delivery, IAR, **Stock in and issue**: an RIS and an ICS or PAR print |
+| Validator | At least one BAC member has the validator role |
 | Email | Approve a test account: the email arrives within 2 minutes |
 | Backups | `scripts\restore-test.bat` on last night's dump ends with PASS |
 | Privacy notice | The office or university privacy officer approved the wording on the sign-up screen |
@@ -208,6 +215,6 @@ php artisan view:cache
 php artisan up
 ```
 
-Copy the new `public/build/` if the frontend changed. Back up the database first.
+Copy the new `public/build/` if the frontend changed. Back up the database first. Read the pull request's deploy notes: they list new migrations and `.env` settings.
 
 **Rollback:** `php artisan down`, then `git checkout <previous tag>`, restore the database dump, run `composer install --no-dev`, and `php artisan up`.

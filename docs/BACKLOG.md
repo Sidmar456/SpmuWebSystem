@@ -71,10 +71,10 @@ Checked against the code on 25 Nov 2026 (branch `laravel-rewrite`). Update this 
 | S5.5 | Property clearance certificate | Done |
 | S6.5 | Reminders for requests and turnovers waiting over 3 days | Done |
 | S0.6 | Daily log rotation | Done |
-| S8.1 | Production deployment | Ready: run on the server |
-| S8.2 | Daily backups and a restore test | Ready: scripts tested locally |
-| S8.3 | Opening balances and user acceptance test | Ready: run with the office |
-| S8.4 | User guide and training | Guide done; training not held |
+| S8.1 | Production deployment | Ready: run on the server (DEPLOYMENT.md covers E9, E10 and validators) |
+| S8.2 | Daily backups and a restore test | Ready: scripts tested locally; restore test counts the E9 and E10 tables |
+| S8.3 | Opening balances and user acceptance test | Ready: run with the office (UAT.md has U1–U15, A1–A22, B1–B3) |
+| S8.4 | User guide and training | Guide done for every flow; training (3 sessions) not held |
 | S9.1 | Request a pre-inspection of issued equipment | Done |
 | S9.2 | Schedule and record the pre-inspection report | Done |
 | S9.3 | Route the outcome: turn over, or purchase request | Done |

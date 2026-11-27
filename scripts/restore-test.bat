@@ -19,12 +19,12 @@ set TMPOUT=%TEMP%\spmu_restore_value.txt
 "%MYSQL%\mysql.exe" --defaults-extra-file="%CNF%" %SCRATCH% < "%~1" || goto :fail
 echo Restored %~1 into %SCRATCH%.
 echo.
-echo Table                 Live   Restored
-for %%t in (users suppliers items stock_movements item_requests item_request_lines turnovers supplier_orders) do (
+echo Table                   Live   Restored
+for %%t in (users suppliers items stock_movements item_requests item_request_lines turnovers supplier_orders inspections iirups inquiries purchase_requests purchase_request_steps) do (
     call :value "SELECT COUNT(*) FROM %LIVE%.%%t" L
     call :value "SELECT COUNT(*) FROM %SCRATCH%.%%t" R
-    set "NAME=%%t                      "
-    echo !NAME:~0,20!  !L!   !R!
+    set "NAME=%%t                        "
+    echo !NAME:~0,22!  !L!   !R!
 )
 
 rem The ledger rule: items.quantity must equal the sum of that item's movements.
