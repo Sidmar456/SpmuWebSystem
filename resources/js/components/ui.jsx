@@ -108,7 +108,7 @@ export function Textarea({ label, error, hint, required, ...props }) {
 
 export function Card({ title, actions, children, className = '' }) {
     return (
-        <section className={`rounded-lg bg-white shadow-sm ring-1 ring-slate-200 ${className}`}>
+        <section className={`glass rounded-xl ${className}`}>
             {(title || actions) && (
                 <header className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
                     <h2 className="text-base font-semibold text-slate-900">{title}</h2>
@@ -256,7 +256,7 @@ export function Modal({ open, title, onClose, children, wide = false }) {
             ref={ref}
             onClose={onClose}
             aria-labelledby={titleId}
-            className={`m-auto w-[calc(100%-2rem)] ${wide ? 'max-w-3xl' : 'max-w-lg'} rounded-lg p-0 shadow-xl backdrop:bg-slate-900/40`}
+            className={`m-auto w-[calc(100%-2rem)] ${wide ? 'max-w-3xl' : 'max-w-lg'} glass rounded-xl p-0 shadow-xl backdrop:bg-maroon-900/40 backdrop:backdrop-blur-sm`}
         >
             <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
                 <h2 id={titleId} className="text-base font-semibold">

@@ -48,7 +48,7 @@ export default function Dashboard() {
                     <li key={key}>
                         <Link
                             to={to}
-                            className="block h-full rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200 transition-colors duration-150 hover:bg-slate-50 hover:ring-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                            className="glass block h-full rounded-xl p-4 transition-colors duration-150 hover:bg-white/85 hover:ring-1 hover:ring-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                         >
                             <span className={`block text-3xl font-semibold tabular-nums ${data.counts[key] > 0 ? 'text-slate-900' : 'text-slate-400'}`}>{data.counts[key]}</span>
                             <span className="mt-1 block text-sm text-slate-600">{label}</span>

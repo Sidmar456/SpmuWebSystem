@@ -24,7 +24,7 @@ const GROUPS = [[undefined], ['Supplies', Basket], ['Property', Armchair], ['Off
 const COLLAPSED_KEY = 'spmu.menu.collapsed';
 // One menu row: full width, a line under each row, a left bar marks the current screen.
 const ROW =
-    'flex min-h-12 w-full cursor-pointer items-center gap-3 border-b border-l-4 border-b-slate-600/80 px-4 text-left text-[15px] transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white';
+    'flex min-h-12 w-full cursor-pointer items-center gap-3 border-b border-l-4 border-b-white/10 px-4 text-left text-[15px] transition-colors duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white';
 
 export default function Layout() {
     const { user, isAdmin, logout } = useAuth();
@@ -99,16 +99,19 @@ export default function Layout() {
             </a>
 
             <aside
-                className={`flex flex-col bg-slate-700 text-slate-100 md:sticky md:top-0 md:h-dvh md:shrink-0 md:transition-[width] md:duration-150 motion-reduce:transition-none ${collapsed ? 'md:w-16' : 'md:w-64'}`}
+                className={`flex flex-col bg-maroon-900/90 text-white backdrop-blur-xl md:sticky md:top-0 md:h-dvh md:shrink-0 md:transition-[width] md:duration-150 motion-reduce:transition-none ${collapsed ? 'md:w-16' : 'md:w-64'}`}
             >
-                <div className={`flex items-center justify-between gap-2 border-b border-slate-600 px-4 py-3 ${collapsed ? 'md:justify-center md:px-2' : ''}`}>
-                    <div className={collapsed ? 'md:hidden' : ''}>
+                <div className={`flex items-center justify-between gap-2 border-b border-white/10 px-4 py-3 ${collapsed ? 'md:justify-center md:px-2' : ''}`}>
+                    <div className={`flex min-w-0 items-center gap-3 ${collapsed ? 'md:hidden' : ''}`}>
+                        <img src="/images/zppsu-logo.jpg" alt="ZPPSU seal" width="40" height="40" className="size-10 shrink-0 rounded-full bg-white object-contain ring-2 ring-gold/70" />
+                        <div className="min-w-0">
                         <p className="text-sm font-semibold">SPMU IMS</p>
-                        <p className="text-xs text-slate-300">ZPPSU Supply Office</p>
+                        <p className="text-xs text-gold">ZPPSU Supply Office</p>
+                        </div>
                     </div>
                     <Button
                         variant="ghost"
-                        className="text-slate-100 hover:bg-slate-600 md:hidden"
+                        className="text-white hover:bg-white/10 md:hidden"
                         aria-expanded={menuOpen}
                         aria-controls="main-nav"
                         onClick={() => setMenuOpen((open) => !open)}
@@ -123,7 +126,7 @@ export default function Layout() {
                         aria-controls="main-nav"
                         title={collapsed ? 'Expand menu' : 'Collapse menu'}
                         onClick={() => setCollapsed((c) => !c)}
-                        className="hidden size-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-slate-800 text-slate-200 ring-1 ring-slate-600 transition-colors duration-150 hover:bg-slate-600 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:inline-flex"
+                        className="hidden size-10 shrink-0 cursor-pointer items-center justify-center rounded-md bg-white/10 text-white ring-1 ring-white/20 transition-colors duration-150 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:inline-flex"
                     >
                         <List size={22} aria-hidden="true" />
                     </button>
@@ -152,7 +155,7 @@ export default function Layout() {
                                         aria-controls={listId}
                                         title={collapsed ? group : undefined}
                                         onClick={onGroupClick}
-                                        className={`${ROW} border-l-transparent text-slate-200 hover:bg-slate-600 hover:text-white ${collapsed ? 'md:justify-center md:px-0' : ''}`}
+                                        className={`${ROW} border-l-transparent text-white/85 hover:bg-white/10 hover:text-white ${collapsed ? 'md:justify-center md:px-0' : ''}`}
                                     >
                                         <GroupIcon size={20} aria-hidden="true" className="shrink-0" />
                                         <span className={collapsed ? 'md:sr-only' : ''}>{group}</span>
@@ -160,11 +163,11 @@ export default function Layout() {
                                             size={14}
                                             weight="bold"
                                             aria-hidden="true"
-                                            className={`ml-auto shrink-0 text-slate-400 transition-transform duration-150 motion-reduce:transition-none ${open ? '-rotate-90' : ''} ${collapsed ? 'md:hidden' : ''}`}
+                                            className={`ml-auto shrink-0 text-white/60 transition-transform duration-150 motion-reduce:transition-none ${open ? '-rotate-90' : ''} ${collapsed ? 'md:hidden' : ''}`}
                                         />
                                     </button>
                                 )}
-                                <div id={listId} role="group" aria-label={group} hidden={!open} className={`${group ? 'bg-slate-800/50' : ''} ${collapsed && group ? 'md:hidden' : ''}`}>
+                                <div id={listId} role="group" aria-label={group} hidden={!open} className={`${group ? 'bg-black/20' : ''} ${collapsed && group ? 'md:hidden' : ''}`}>
                                     {items.map(({ to, label, icon: Icon }) => (
                                         <NavLink
                                             key={to}
@@ -173,7 +176,7 @@ export default function Layout() {
                                             onClick={() => setMenuOpen(false)}
                                             className={({ isActive }) =>
                                                 `${ROW} ${group ? 'pl-9' : ''} ${collapsed ? 'md:justify-center md:px-0' : ''} ${
-                                                    isActive ? 'border-l-brand bg-slate-800 font-medium text-white' : 'border-l-transparent text-slate-200 hover:bg-slate-600 hover:text-white'
+                                                    isActive ? 'border-l-gold bg-white/15 font-medium text-white' : 'border-l-transparent text-white/85 hover:bg-white/10 hover:text-white'
                                                 }`
                                             }
                                         >
@@ -193,7 +196,7 @@ export default function Layout() {
             </aside>
 
             <div className="flex min-w-0 flex-1 flex-col">
-                <header className="flex items-center justify-end gap-3 border-b border-slate-200 bg-white px-4 py-3">
+                <header className="sticky top-0 z-10 flex items-center justify-end gap-3 border-b border-white/60 bg-white/60 px-4 py-3 backdrop-blur-md">
                     <Link
                         to="/notifications"
                         aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}

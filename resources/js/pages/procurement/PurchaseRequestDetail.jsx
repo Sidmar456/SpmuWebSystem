@@ -474,7 +474,7 @@ function ItemPicker({ name, value, onChange, error }) {
                     <li key={item.id}>
                         <label
                             className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 text-sm ring-1 transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-brand ${
-                                String(value) === String(item.id) ? 'bg-blue-50 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
+                                String(value) === String(item.id) ? 'bg-brand/10 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
                             }`}
                         >
                             <input
@@ -555,7 +555,7 @@ function IssueForm({ pr, threshold, onDone }) {
                                         <label
                                             key={mode}
                                             className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-3 text-sm ring-1 transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-brand ${
-                                                r.mode === mode ? 'bg-blue-50 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
+                                                r.mode === mode ? 'bg-brand/10 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
                                             }`}
                                         >
                                             <input type="radio" name={`mode-${l.id}`} checked={r.mode === mode} onChange={() => set(l.id, { mode })} className="size-4 accent-brand" />

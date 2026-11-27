@@ -162,7 +162,7 @@ function AnswerForm({ inquiry, onDone }) {
                                     <label
                                         key={value}
                                         className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 text-sm ring-1 transition-colors duration-150 has-focus-visible:ring-2 has-focus-visible:ring-brand ${
-                                            answers[l.id].availability === value ? 'bg-blue-50 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
+                                            answers[l.id].availability === value ? 'bg-brand/10 ring-brand' : 'bg-white ring-slate-300 hover:bg-slate-50'
                                         }`}
                                     >
                                         <input type="radio" name={`line-${l.id}`} value={value} checked={answers[l.id].availability === value} onChange={() => set(l.id, 'availability', value)} className="size-4 accent-brand" />
